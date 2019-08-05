@@ -55,12 +55,15 @@ class hdbm_mcmc {
             beta_m[j] = new_beta;
             /* update r1 */
 
-            double p = exp(0.5 * (mbm1 * mbm1 / var_m1(j)
+            double p = 0.5 * (mbm1 * mbm1 / var_m1(j)
                        - mbm0 * mbm0 / var_m0(j) + log(var_m1(j))
                        - log(var_m0(j)) + log(sigma_m0) - log(sigma_m1)
-                       ) + log(pi_m / (1.0 - pi_m))
+                       ) + log(pi_m / (1.0 - pi_m)
             );
-            r1[j] = rand_bernoulli(p / (1.0 + p));
+            if (p > 30)
+                r1[j] = 1;
+             else
+                r1[j] = rand_bernoulli(exp(p) / (1.0 + exp(p)));
         }
     }
 
@@ -84,12 +87,14 @@ class hdbm_mcmc {
 
         // update r3
         for (arma::uword j = 0; j < r3.n_elem; ++j) {
-            double p = exp(0.5 * (maa1[j] * maa1[j] / var_aa1
+            double p = 0.5 * (maa1[j] * maa1[j] / var_aa1
                 - maa0[j] * maa0[j] / var_aa0 + log(var_aa1) - log(var_aa0)
                 + log(sigma_ma0) - log(sigma_ma1)
-                ) + log(pi_a / (1.0 - pi_a))
-            );
-            r3[j] = rand_bernoulli(p / (1.0 + p));
+            ) + log(pi_a / (1.0 - pi_a));
+            if (p > 30)
+                r3[j] = 1;
+            else
+                r3[j] = rand_bernoulli(exp(p) / (1.0 + exp(p)));
         }
     }
 
@@ -111,25 +116,25 @@ class hdbm_mcmc {
     void update_beta_c(arma::mat &C1)
     {
         // This is what Yanyi wrote but I think it is incorrect
-        for (arma::uword j = 0; j < C1.n_cols; ++j) {
-            double mu_cj = 0.0;
-            double old = beta_c1[j];
-            for (arma::uword i = 0; i < C1.n_rows; ++i) {
-                mu_cj += C1(i, j) * ( rY[i] + C1(i, j) * beta_c1[j]);
-                mu_cj /= norm2_c1[j];
-                beta_c1[j] = R::rnorm(mu_cj, sqrt(sigma_e /norm2_c1[j]));
-            }
-            rY += (old - beta_c1(j)) * C1.col(j);
-        }
+        // for (arma::uword j = 0; j < C1.n_cols; ++j) {
+        //     double mu_cj = 0.0;
+        //     double old = beta_c1[j];
+        //     for (arma::uword i = 0; i < C1.n_rows; ++i) {
+        //         mu_cj += C1(i, j) * ( rY[i] + C1(i, j) * beta_c1[j]);
+        //         mu_cj /= norm2_c1[j];
+        //         beta_c1[j] = R::rnorm(mu_cj, sqrt(sigma_e /norm2_c1[j]));
+        //     }
+        //     rY += (old - beta_c1(j)) * C1.col(j);
+        // }
         // What I wrote -- Doesn't fix the bug(s)
-        //arma::vec mu_beta_c = C1.t() * C1 * beta_c1;
-        //for (arma::uword j = 0; j < C1.n_cols; ++j) {
-        //    double t   = dot(C1.col(j), rY);
-        //    double mbc = (mu_beta_c(j) + t) / norm2_c1(j);
-        //    double new_beta_c1 = R::rnorm(mbc, sqrt(sigma_e / norm2_c1(j)));
-        //    rY += C1.col(j) * (beta_c1(j) - new_beta_c1);
-        //    beta_c1(j) = new_beta_c1;
-        //}
+        arma::vec mu_beta_c = C1.t() * C1 * beta_c1;
+        for (arma::uword j = 0; j < C1.n_cols; ++j) {
+           double t   = dot(C1.col(j), rY);
+           double mbc = (mu_beta_c(j) + t) / norm2_c1(j);
+           double new_beta_c1 = R::rnorm(mbc, sqrt(sigma_e / norm2_c1(j)));
+           rY += C1.col(j) * (beta_c1(j) - new_beta_c1);
+           beta_c1(j) = new_beta_c1;
+        }
     }
 
     void update_beta_a(arma::vec &A)
@@ -252,7 +257,7 @@ class hdbm_mcmc {
         // inline function
         auto post_dist = [](arma::vec r, double pi)
         {
-            return sum((log(pi) * r) % (log(1.0 - pi) * (1.0 - r)));
+            return sum((log(pi) * r) + (log(1.0 - pi) * (1.0 - r)));
         };
 
         double p = post_dist(r3, m_pi_a) - post_dist(r3, pi_a)

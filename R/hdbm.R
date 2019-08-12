@@ -1,115 +1,65 @@
-hdbm <- function(outcome, exposure, mediators, beta.m, alpha.a, pi.m, pi.a,
-                   covars.m = NULL, covars.a = NULL, burnin = 30000,
-                   n.samples = 1000)
+#' @export
+hdbm <- function(Y, A, M, C1, C2, beta.m, alpha.a, pi.m, pi.a, burnin = 30000,
+                     nsamples = 1000)
 {
-  if (!is.vector(outcome))
-   stop("outcome should be a numeric vector.")
-  if (!is.numeric(outcome))
-    stop("outcome must be numeric.")
-  else if (is.integer(outcome))
-    outcome <- as.double(outcome)
-  if (any(is.na(outcome)))
-    stop("outcome cannot have missing values.")
-  n <- length(outcome)
-  outcome <- as.matrix(outcome)
+    if (!is.vector(Y) || !is.numeric(Y))
+        stop("Y must be a numeric vector.")
+    else if (is.integer(Y))
+        Y <- as.double(Y)
 
-  exposure <- check_input1(exposure, n, "exposure")
+    if (any(is.na(Y)))
+        stop("Y must not have missing values.")
 
-  mediators <- check_input2(mediators, n, "mediators")
-  q <- ncol(mediators)
+    if (!is.vector(A) || !is.numeric(A))
+        stop("A should be a numeric vector.")
+    else if (is.integer(A))
+        A <- as.double(A)
 
-  if (!is.null(covars.m)) {
-      covars.m  <- check_input2(covars.m, n, "covars.m")
-      covars.m  <- normalize(covars.m)
-  }
-  covars.m  <- cbind(rep(1, n), covars.m)
+    if (any(is.na(A)))
+        stop("A cannot have missing values.")
 
-  if (!is.null(covars.a)) {
-      covars.a  <- check_input2(covars.a, n, "covars.a")
-      covars.a  <- normalize(covars.a)
-  }
-  covars.a  <- cbind(rep(1, n), covars.a)
+    if (length(A) != length(Y))
+        stop("Lengths of A and Y do not match.")
 
-  beta.m  <- check_input1(beta.m, q, "beta.m")
-  alpha.a <- check_input1(alpha.a, q, "alpha.a")
+    if (!is.matrix(M) || !is.numeric(M))
+        stop("M must be a numeric matrix.")
+    else if (is.integer(M))
+        M <- matrix(as.double(M), nrow(M), ncol(M))
 
-  if (!is.double(pi.m))
-    stop("pi.m must be real number.")
-  if ( 0 > pi.m || pi.m > 1)
-    stop("pi.m must be in [0,1]")
-  if (!is.double(pi.a))
-    stop("pi.a must be real number.")
-  if ( 0 > pi.a || pi.a > 1)
-    stop("pi.a must be in [0,1]")
+    if (any(is.na(M)))
+        stop("M cannot have missing values.")
 
-  outcome   <- normalize(outcome)
-  exposure  <- normalize(exposure)
-  mediators <- normalize(mediators)
+    if (nrow(M) != length(Y))
+        stop("The number of rows in M does not match the length of Y.")
 
-  # output <- .Call("hdbm_rwrapper", outcome, exposure, mediators, covars.m,
-  #                   covars.a, alpha.a, beta.m, pi.m, pi.a, burnin, n.samples)
-  names(output) <- c("beta.m", "r1", "alpha.a", "r3", "beta.a", "pi.m", "pi.a",
-                       "sigma.m0", "sigma.m1", "sigma.ma0", "sigm.ma1")
-  return(output)
-}
+    if (!is.vector(beta.m) || !is.numeric(beta.m))
+        stop("beta.m must be a numeric vector")
+    if (is.integer(beta.m))
+        beta.m <- as.double(beta.m)
+    if (any(is.na(beta.m)))
+        stop("beta.m cannot contain missing values")
 
 
-check_input1 <- function(x, n, name)
-{
-  if (!is.vector(x))
-    stop(sprintf("%s should be a numeric vector.", name))
-  if (length(x) != n)
-    stop(sprintf("%s does not have the same length as outcome.", name))
-  if (!is.numeric(x))
-    stop(sprintf("%s must be numeric.", name))
-  else if (is.integer(x))
-    x <- as.double(x)
-  if (any(is.na(x)))
-      stop(sprintf("%s cannot have missing values.", name))
-  return(as.matrix(x))
-}
+    if (!is.double(pi.m))
+        stop("pi.m must be real number.")
+    if ( 0 >= pi.m || pi.m >= 1)
+        stop("pi.m must be in (0,1)")
+    if (!is.double(pi.a))
+        stop("pi.a must be real number.")
+    if ( 0 >= pi.a || pi.a >= 1)
+        stop("pi.a must be in (0,1)")
 
+  Y <- normalize(Y)
+  A <- normalize(A)
+  M <- normalize(M)
 
-check_input2 <- function(x, n, name)
-{
-  if (is.vector(x)) {
-    if (!is.numeric(x))
-      stop(sprintf("%s must be numeric.", name))
-    else if (is.integer(x))
-      x <- as.double(x)
-    if (any(is.na(x)))
-      stop(sprintf("%s cannot have missing values.", name))
-    if (length(x) != n)#' @useDynLib hdbm hdbm_rwrapper
-      stop(sprintf("%s must have the same length as outcome.", name))
-     x <- as.matrix(x)
-  }
-  else if (is.data.frame(x)) {
-    if (nrow(x) != n)
-      stop(sprintf("%s must have the same number of rows as the outcome.", name))
-    if (sum(sapply(x, is.numeric)) < ncol(x))
-        stop(sprintf("%s must be numeric.", name))
-    x <- sapply(x, as.double)
-    if (any(is.na(x)))
-      stop(sprintf("%s cannot contain missing values.", name))
- }
-  else if (is.matrix(x)) {
-    if (nrow(x) != n)
-      stop(sprintf("%s must have the same number of rows as the outcome.", name))
-    if (!is.numeric(x))
-      stop(sprintf("%s must be numeric.", name))
-    x <- matrix(as.double(x), nrow(x), ncol(x))
-    if (any(is.na(x)))
-      stop(sprintf("%s cannot contain missing values.", name))
-  }
-  else
-    stop(sprintf("%s does not have the correct type.", name))
-
-  return(x)
+  run_hdbm_mcmc(Y, A, M, C1, C2, beta.m, alpha.a, pi.m, pi.a, burnin, nsamples)
 }
 
 normalize <- function(x)
 {
-    for (i in 1:ncol(x))
-      x[, i] <- (x[, i] - mean(x[, i])) / sd(x[, i])
-  x
+  if (is.vector(x))
+    (x - mean(x)) / sd(x)
+  else
+    apply(x, 2, function(x) (x - mean(x)) / sd(x))
 }

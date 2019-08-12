@@ -35,8 +35,7 @@ double rand_norm(double mu, double sigma_sq)
 
 // Putting the MCMC into a class is technically unnecessary but it simplifies
 // the function signatures considerably. Everything is public.
-class hdbm_mcmc {
-    public:
+struct hdbm_mcmc {
 
     double sigma_e;
     double sigma_g;
@@ -95,9 +94,6 @@ class hdbm_mcmc {
         rM  = M - A * alpha_a.t();
         rMC = rM;
 
-        dMtM   = diagmat(M.t() * M);
-        dC1tC1 = diagmat(C1.t() * C1);
-
         r1 = arma::vec(beta_m.n_elem, arma::fill::zeros);
         r3 = arma::vec(alpha_a.n_elem, arma::fill::zeros);
 
@@ -120,14 +116,11 @@ class hdbm_mcmc {
 
     void update_beta_m(arma::mat &M, arma::vec &var_m0, arma::vec &var_m1)
     {
-        // dMtM := diagmat(M.t() * M)
-        arma::vec mu_beta_m = dMtM * beta_m;
         for (arma::uword j = 0; j < M.n_cols; ++j) {
-            double t = dot(M.col(j), rY);
-
-            // calculate mu_beta_mj for active and inactive beta_ms
-            auto mbm0 = (mu_beta_m[j] + t) / (sigma_e / sigma_m0 + norm2_m[j]);
-            auto mbm1 = (mu_beta_m[j] + t) / (sigma_e / sigma_m1 + norm2_m[j]);
+            double t = norm2_m[j] * beta_m[j] + arma::dot(M.col(j), rY);
+            // calculate mu_beta_mj (mbm) for active and inactive beta_ms
+            double mbm0 = t / (sigma_e / sigma_m0 + norm2_m[j]);
+            double mbm1 = t / (sigma_e / sigma_m1 + norm2_m[j]);
             double new_beta = r1[j] * rand_norm(mbm1, var_m1[j])
                             + (1.0 - r1[j]) * rand_norm(mbm0, var_m0[j]);
 
@@ -181,11 +174,11 @@ class hdbm_mcmc {
     {
         for (arma::uword j = 0; j < rM.n_cols; ++j) {
             for (arma::uword k = 0; k < C2.n_cols; ++k) {
-                auto mu_alpha_c = arma::dot(C2.col(k), rM.col(j)
-                                    + C2.col(k) * alpha_c2(k, j));
+                auto mu_alpha_c = arma::dot(C2.col(k), rM.col(j)) / norm2_c2[k]
+                                  + alpha_c2(k, j);
 
-                double new_alpha = rand_norm(mu_alpha_c / norm2_c2[k],
-                                         sigma_g / norm2_c2[k]);
+                double new_alpha = rand_norm(mu_alpha_c, sigma_g / norm2_c2[k]);
+
                 rM.col(j)  += (alpha_c2(k, j) - new_alpha) * C2.col(k);
                 rMC.col(j) += (alpha_c2(k, j) - new_alpha) * C2.col(k);
                 alpha_c2(k, j) = new_alpha;
@@ -210,11 +203,11 @@ class hdbm_mcmc {
     void update_beta_c(arma::mat &C1)
     {
         // dC1tC1 := diagmat(C1.t() * C1)
-        arma::vec mu_beta_c = dC1tC1 * beta_c1;
+        //arma::vec mu_beta_c = dC1tC1 * beta_c1;
         for (arma::uword j = 0; j < C1.n_cols; ++j) {
-           double t   = dot(C1.col(j), rY);
-           double mbc = (mu_beta_c[j] + t) / norm2_c1[j];
-           double new_beta_c1 = rand_norm(mbc, sigma_e / norm2_c1[j]);
+           double mu_beta_c = beta_c1[j] + dot(C1.col(j), rY) / norm2_c1[j];
+
+           double new_beta_c1 = rand_norm(mu_beta_c, sigma_e / norm2_c1[j]);
            rY += C1.col(j) * (beta_c1[j] - new_beta_c1);
            beta_c1[j] = new_beta_c1;
         }

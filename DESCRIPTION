@@ -1,7 +1,7 @@
 Package: hdbm
 Title: High Dimensional Bayesian Mediation
 Version: 0.0.0.9000
-Authors@R: 
+Authors@R:
     c(person(given = "Alexander",
            family = "Rix",
            role = c("aut", "cre"),
@@ -9,15 +9,15 @@ Authors@R:
       person(given = "Yanyi",
            family = "Song",
            role = c("aut"),
-           email = "yanys@umich.edu")
-Description: What the package does (one paragraph).
+           email = "yanys@umich.edu"))
+Description: TODO
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.1.1
-LinkingTo: 
+LinkingTo:
     Rcpp,
     RcppArmadillo
-Imports: 
+Imports:
     Rcpp

@@ -15,10 +15,45 @@
 #' @param burnin number of iterations to run the MCMC before sampling.
 #' @param nsamples number of samples to draw from MCMC.
 #' @return
-#' hdbm returns a list with 11 elements
+#' hdbm returns a list with 11 elements (each of `length nsamples`),
+#' sampled from the burned in MCMC:
+#' \describe{
+#'   \item{beta.m}{Response model mediator coefficients}
+#'   \item{r1}{Whether or not each beta.m is active (1) or inactive (0)}
+#'   \item{alpha.a}{Rediator model exposure coefficients}
+#'   \item{r3}{Whether or not alpha.a is active (1) or inactive (0)}
+#'   \item{beta.a}{beta.a coefficient}
+#'   \item{pi.m}{Proportion of non zero beta.m coefficients.}
+#'   \item{pi.a}{Proportion of non zero alpha.a coefficients.}
+#'   \item{sigma.m0}{Standard deviation of the inactive mediators in the
+#'       response model.}
+#'   \item{sigma.m1}{Standard deviation of the active mediators in the
+#'       response model.}
+#'   \item{sigma.ma0}{Standard deviation of the inactive mediators in the
+#'       mediator model.}
+#'   \item{sigma.ma1}{Standard deviation of the active mediators in the
+#'       mediator model.}
+#' }
 #' @examples
 #' library(hdbm)
-#' output <- hdbm(y, a, m, c, c, beta.m, alpha.a, burnin = 3000, nsamples = 100)
+#'
+#' Y <- hdbm.data$y
+#' A <- hdbm.data$a
+#'
+#' # grab the mediators from the example data.frame
+#' M <- as.matrix(hdbm.data[, paste0("m", 1:100)], nrow(hdbm.data))
+#'
+#' # We just include the intercept term in this example.
+#' C <- matrix(1, nrow(M), 1)
+#' beta.m <- rep(0, 100)
+#' alpha.a <- rep(0, 100)
+#'
+#' set.seed(1245)
+#' output <- hdbm(Y, A, M, C, C, beta.m, alpha.a, burnin = 3000, nsamples = 100)
+#'
+#' # Which mediators are active?
+#' active <- which(colSums(output$r1 * output$r3) > 50)
+#' colnames(M)[active]
 #' @references
 #' Yanyi Song, Xiang Zhou et al. Bayesian Shrinkage Estimation of High
 #' Dimensional Causal Mediation Effects in Omics Studies.
@@ -78,10 +113,10 @@ hdbm <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, nsamples)
     run_hdbm_mcmc(Y, A, M, C1, C2, beta.m, alpha.a, pi.m, pi.a, burnin, nsamples)
 }
 
-normalize <- function(x)
-{
-  if (is.vector(x))
-    (x - mean(x)) / sd(x)
-  else
-    apply(x, 2, function(x) (x - mean(x)) / sd(x))
-}
+# normalize <- function(x)
+# {
+#   if (is.vector(x))
+#     (x - mean(x)) / sd(x)
+#   else
+#     apply(x, 2, function(x) (x - mean(x)) / sd(x))
+# }

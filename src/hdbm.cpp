@@ -34,7 +34,7 @@ double rand_norm(double mu, double sigma_sq)
 }
 
 // Putting the MCMC into a class is technically unnecessary but it simplifies
-// the function signatures considerably. Everything is public.
+// the function signatures considerably.
 struct hdbm_mcmc {
 
     double sigma_e;

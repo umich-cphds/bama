@@ -5,32 +5,13 @@
 #include <Rcpp.h>
 
 using namespace Rcpp;
+Rcpp::List run_hdbm_mcmc(arma::vec Y, arma::vec A, arma::mat M, arma::mat C1,
+                            arma::mat C2, arma::vec beta_m_init, arma::vec
+                            alpha_a_init, double pi_m_init, double pi_a_init,
+                            int burnin, int nsamples);
 
-// rand_bernoulli
-int rand_bernoulli(double p);
-RcppExport SEXP _hdbm_rand_bernoulli(SEXP pSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type p(pSEXP);
-    rcpp_result_gen = Rcpp::wrap(rand_bernoulli(p));
-    return rcpp_result_gen;
-END_RCPP
-}
-// rand_invgamma
-double rand_invgamma(double shape, double scale);
-RcppExport SEXP _hdbm_rand_invgamma(SEXP shapeSEXP, SEXP scaleSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type shape(shapeSEXP);
-    Rcpp::traits::input_parameter< double >::type scale(scaleSEXP);
-    rcpp_result_gen = Rcpp::wrap(rand_invgamma(shape, scale));
-    return rcpp_result_gen;
-END_RCPP
-}
 // run_hdbm_mcmc
-Rcpp::List run_hdbm_mcmc(arma::vec Y, arma::vec A, arma::mat M, arma::mat C1, arma::mat C2, arma::vec beta_m_init, arma::vec alpha_a_init, double pi_m_init, double pi_a_init, int burnin, int nsamples);
+//' @useDynLib hdbm //' @importFrom Rcpp evalCpp Rcpp::List run_hdbm_mcmc(arma::vec Y, arma::vec A, arma::mat M, arma::mat C1, arma::mat C2, arma::vec beta_m_init, arma::vec alpha_a_init, double pi_m_init, double pi_a_init, int burnin, int nsamples);
 RcppExport SEXP _hdbm_run_hdbm_mcmc(SEXP YSEXP, SEXP ASEXP, SEXP MSEXP, SEXP C1SEXP, SEXP C2SEXP, SEXP beta_m_initSEXP, SEXP alpha_a_initSEXP, SEXP pi_m_initSEXP, SEXP pi_a_initSEXP, SEXP burninSEXP, SEXP nsamplesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -52,8 +33,6 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_hdbm_rand_bernoulli", (DL_FUNC) &_hdbm_rand_bernoulli, 1},
-    {"_hdbm_rand_invgamma", (DL_FUNC) &_hdbm_rand_invgamma, 2},
     {"_hdbm_run_hdbm_mcmc", (DL_FUNC) &_hdbm_run_hdbm_mcmc, 11},
     {NULL, NULL, 0}
 };

@@ -92,7 +92,7 @@ struct hdbm_mcmc {
         // included in the calculation.
         rY  = Y - A * beta_a - M * beta_m;
         rM  = M - A * alpha_a.t();
-        rMC = rM;
+        rMC = M;
 
         r1 = arma::vec(beta_m.n_elem, arma::fill::zeros);
         r3 = arma::vec(alpha_a.n_elem, arma::fill::zeros);
@@ -147,7 +147,7 @@ struct hdbm_mcmc {
 
         arma::vec new_alpha_a = alpha_a;
         for (arma::uword j = 0; j < alpha_a.n_elem; ++j) {
-            double maa0 = arma::dot(A, rMC.col(j)) + norm2_a * alpha_a(j) ;
+            double maa0 = arma::dot(A, rMC.col(j));
             double maa1 = maa0;
             maa0 *= var_aa0 / sigma_g;
             maa1 *= var_aa1 / sigma_g;
@@ -166,7 +166,6 @@ struct hdbm_mcmc {
         }
 
         rM += A * (alpha_a - new_alpha_a).t();
-        rMC += A * (alpha_a - new_alpha_a).t();
         alpha_a = new_alpha_a;
     }
 
@@ -184,20 +183,6 @@ struct hdbm_mcmc {
                 alpha_c2(k, j) = new_alpha;
             }
         }
-
-        // arma::mat mu_alpha_c = C2.t() * (rM + C2 * alpha_c2);
-        // arma::mat new_alpha_c2 = alpha_c2;
-        // for (arma::uword j = 0; j < rM.n_cols; ++j) {
-        //     for (arma::uword k = 0; k < C2.n_cols; ++k) {
-        //         new_alpha_c2(k, j) = rand_norm(mu_alpha_c(k, j) / norm2_c2[k],
-        //                                  sigma_g / norm2_c2[k]);
-        //     }
-        // }
-        //
-        // rM  += C2 * (alpha_c2 - new_alpha_c2);
-        // rMC += C2 * (alpha_c2 - new_alpha_c2);
-        //
-        // alpha_c2 = new_alpha_c2;
     }
 
     void update_beta_c(arma::mat &C1)
@@ -300,10 +285,9 @@ struct hdbm_mcmc {
 };
 
 // [[Rcpp::depends(RcppArmadillo)]]
-//' @export
+// [[Rcpp::export]]
 //' @useDynLib hdbm
 //' @importFrom Rcpp evalCpp
-// [[Rcpp::export]]
 Rcpp::List run_hdbm_mcmc(arma::vec Y, arma::vec A, arma::mat M, arma::mat C1,
                           arma::mat C2, arma::vec beta_m_init, arma::vec
                           alpha_a_init, double pi_m_init, double pi_a_init,

@@ -1,6 +1,30 @@
+#' High Dimensional Bayesian Mediation
+#'
+#' A Bayesian inference method using continuous shrinkage priors for
+#' high-dimensional mediation analysis, developed by Song et al (2018).
+#' \code{hdbm} provides estimates for the regression coefficients as well as
+#' the posterior inclusion probability for ranking mediators.
+#'
+#' @param Y numeric response vector.
+#' @param A numeric exposure vector.
+#' @param M numeric matrix of mediators of Y and A.
+#' @param C1 numeric matrix of extra covariates in the response model.
+#' @param C2 numeric matrix of extra covariates in the mediator model.
+#' @param beta.m numeric vector of initial beta.m in the response model.
+#' @param alpha.a numeric vector of initial alpha.a in the mediator model.
+#' @param burnin number of iterations to run the MCMC before sampling.
+#' @param nsamples number of samples to draw from MCMC.
+#' @return
+#' hdbm returns a list with 11 elements
+#' @examples
+#' library(hdbm)
+#' output <- hdbm(y, a, m, c, c, beta.m, alpha.a, burnin = 3000, nsamples = 100)
+#' @references
+#' Yanyi Song, Xiang Zhou et al. Bayesian Shrinkage Estimation of High
+#' Dimensional Causal Mediation Effects in Omics Studies.
+#' [bioRxiv 467399](https://doi.org/10.1101/467399)
 #' @export
-hdbm <- function(Y, A, M, C1, C2, beta.m, alpha.a, pi.m, pi.a, burnin = 30000,
-                     nsamples = 1000)
+hdbm <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, nsamples)
 {
     if (!is.vector(Y) || !is.numeric(Y))
         stop("Y must be a numeric vector.")
@@ -39,21 +63,19 @@ hdbm <- function(Y, A, M, C1, C2, beta.m, alpha.a, pi.m, pi.a, burnin = 30000,
     if (any(is.na(beta.m)))
         stop("beta.m cannot contain missing values")
 
+    pi.m <- mean(abs(beta.m)  > 1e-12)
+    pi.a <- mean(abs(alpha.a) > 1e-12)
 
-    if (!is.double(pi.m))
-        stop("pi.m must be real number.")
-    if ( 0 >= pi.m || pi.m >= 1)
-        stop("pi.m must be in (0,1)")
-    if (!is.double(pi.a))
-        stop("pi.a must be real number.")
-    if ( 0 >= pi.a || pi.a >= 1)
-        stop("pi.a must be in (0,1)")
+    if (pi.m == 1 || pi.m == 0)
+        pi.m <- 0.5
+    if (pi.a == 1 || pi.a == 0)
+        pi.a <- 0.5
 
-  Y <- normalize(Y)
-  A <- normalize(A)
-  M <- normalize(M)
+    # Y <- normalize(Y)
+    # A <- normalize(A)
+    # M <- normalize(M)
 
-  run_hdbm_mcmc(Y, A, M, C1, C2, beta.m, alpha.a, pi.m, pi.a, burnin, nsamples)
+    run_hdbm_mcmc(Y, A, M, C1, C2, beta.m, alpha.a, pi.m, pi.a, burnin, nsamples)
 }
 
 normalize <- function(x)

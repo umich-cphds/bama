@@ -11,6 +11,6 @@ devtools::install_github("umich-cphds/hdbm")
 ```
 library(hdbm)
 
-output <- hdbm_mcmc(y, a, m, c, c, beta.m = beta.m, alpha.a = alpha.a,
-                    burnin = 10000, nsamples = 100)
+output <- hdbm(y, a, m, c, c, beta.m = beta.m, alpha.a = alpha.a,
+                 burnin = 10000, nsamples = 100)
 ```

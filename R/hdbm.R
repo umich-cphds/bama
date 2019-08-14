@@ -5,6 +5,7 @@
 #' \code{hdbm} provides estimates for the regression coefficients as well as
 #' the posterior inclusion probability for ranking mediators.
 #'
+#' TODO -- details
 #' @param Y numeric response vector.
 #' @param A numeric exposure vector.
 #' @param M numeric matrix of mediators of Y and A.
@@ -15,7 +16,7 @@
 #' @param burnin number of iterations to run the MCMC before sampling.
 #' @param nsamples number of samples to draw from MCMC.
 #' @return
-#' hdbm returns a list with 11 elements (each of `length nsamples`),
+#' hdbm returns a list with 11 elements (each of length `nsamples`),
 #' sampled from the burned in MCMC:
 #' \describe{
 #'   \item{beta.m}{Response model mediator coefficients}
@@ -116,7 +117,7 @@ hdbm <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, nsamples)
 # normalize <- function(x)
 # {
 #   if (is.vector(x))
-#     (x - mean(x)) / sd(x)
+#     (x - mean(x)) / stats::sd(x)
 #   else
 #     apply(x, 2, function(x) (x - mean(x)) / sd(x))
 # }

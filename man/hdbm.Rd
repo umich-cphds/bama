@@ -26,7 +26,7 @@ hdbm(Y, A, M, C1, C2, beta.m, alpha.a, burnin, nsamples)
 \item{nsamples}{number of samples to draw from MCMC.}
 }
 \value{
-hdbm returns a list with 11 elements (each of \code{length nsamples}),
+hdbm returns a list with 11 elements (each of length \code{nsamples}),
 sampled from the burned in MCMC:
 \describe{
 \item{beta.m}{Response model mediator coefficients}
@@ -51,6 +51,9 @@ A Bayesian inference method using continuous shrinkage priors for
 high-dimensional mediation analysis, developed by Song et al (2018).
 \code{hdbm} provides estimates for the regression coefficients as well as
 the posterior inclusion probability for ranking mediators.
+}
+\details{
+TODO -- details
 }
 \examples{
 library(hdbm)

@@ -5,14 +5,15 @@
 #include <Rcpp.h>
 
 using namespace Rcpp;
+
 Rcpp::List run_hdbm_mcmc(arma::vec Y, arma::vec A, arma::mat M, arma::mat C1,
-                            arma::mat C2, arma::vec beta_m_init, arma::vec
-                            alpha_a_init, double pi_m_init, double pi_a_init,
-                            int burnin, int nsamples);
+                          arma::mat C2, arma::vec beta_m_init, arma::vec
+                          alpha_a_init, double pi_m_init, double pi_a_init,
+                          int burnin, int ndraws);
 
 // run_hdbm_mcmc
-//' @useDynLib hdbm //' @importFrom Rcpp evalCpp Rcpp::List run_hdbm_mcmc(arma::vec Y, arma::vec A, arma::mat M, arma::mat C1, arma::mat C2, arma::vec beta_m_init, arma::vec alpha_a_init, double pi_m_init, double pi_a_init, int burnin, int nsamples);
-RcppExport SEXP _hdbm_run_hdbm_mcmc(SEXP YSEXP, SEXP ASEXP, SEXP MSEXP, SEXP C1SEXP, SEXP C2SEXP, SEXP beta_m_initSEXP, SEXP alpha_a_initSEXP, SEXP pi_m_initSEXP, SEXP pi_a_initSEXP, SEXP burninSEXP, SEXP nsamplesSEXP) {
+//' @useDynLib hdbm //' @importFrom Rcpp evalCpp Rcpp::List run_hdbm_mcmc(arma::vec Y, arma::vec A, arma::mat M, arma::mat C1, arma::mat C2, arma::vec beta_m_init, arma::vec alpha_a_init, double pi_m_init, double pi_a_init, int burnin, int ndraws);
+RcppExport SEXP _hdbm_run_hdbm_mcmc(SEXP YSEXP, SEXP ASEXP, SEXP MSEXP, SEXP C1SEXP, SEXP C2SEXP, SEXP beta_m_initSEXP, SEXP alpha_a_initSEXP, SEXP pi_m_initSEXP, SEXP pi_a_initSEXP, SEXP burninSEXP, SEXP ndrawsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -26,8 +27,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type pi_m_init(pi_m_initSEXP);
     Rcpp::traits::input_parameter< double >::type pi_a_init(pi_a_initSEXP);
     Rcpp::traits::input_parameter< int >::type burnin(burninSEXP);
-    Rcpp::traits::input_parameter< int >::type nsamples(nsamplesSEXP);
-    rcpp_result_gen = Rcpp::wrap(run_hdbm_mcmc(Y, A, M, C1, C2, beta_m_init, alpha_a_init, pi_m_init, pi_a_init, burnin, nsamples));
+    Rcpp::traits::input_parameter< int >::type ndraws(ndrawsSEXP);
+    rcpp_result_gen = Rcpp::wrap(run_hdbm_mcmc(Y, A, M, C1, C2, beta_m_init, alpha_a_init, pi_m_init, pi_a_init, burnin, ndraws));
     return rcpp_result_gen;
 END_RCPP
 }

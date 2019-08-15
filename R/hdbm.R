@@ -14,7 +14,7 @@
 #' @param beta.m numeric vector of initial beta.m in the response model.
 #' @param alpha.a numeric vector of initial alpha.a in the mediator model.
 #' @param burnin number of iterations to run the MCMC before sampling.
-#' @param nsamples number of samples to draw from MCMC.
+#' @param ndraws number of draws to take from MCMC after the burnin period.
 #' @return
 #' hdbm returns a list with 11 elements (each of length `nsamples`),
 #' sampled from the burned in MCMC:
@@ -60,7 +60,7 @@
 #' Dimensional Causal Mediation Effects in Omics Studies.
 #' [bioRxiv 467399](https://doi.org/10.1101/467399)
 #' @export
-hdbm <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, nsamples)
+hdbm <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws)
 {
     if (!is.vector(Y) || !is.numeric(Y))
         stop("Y must be a numeric vector.")
@@ -97,7 +97,7 @@ hdbm <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, nsamples)
     if (is.integer(beta.m))
         beta.m <- as.double(beta.m)
     if (any(is.na(beta.m)))
-        stop("beta.m cannot contain missing values")
+        stop("beta.m cannot contain missing values.")
 
     pi.m <- mean(abs(beta.m)  > 1e-12)
     pi.a <- mean(abs(alpha.a) > 1e-12)
@@ -107,11 +107,16 @@ hdbm <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, nsamples)
     if (pi.a == 1 || pi.a == 0)
         pi.a <- 0.5
 
+    if (!is.numeric(burnin))
+        stop("burnin should be a nonnegative integer.")
+    if (!is.numeric(ndraws))
+        stop("ndraws should be a nonnegative integer.")
+
     # Y <- normalize(Y)
     # A <- normalize(A)
     # M <- normalize(M)
 
-    run_hdbm_mcmc(Y, A, M, C1, C2, beta.m, alpha.a, pi.m, pi.a, burnin, nsamples)
+    run_hdbm_mcmc(Y, A, M, C1, C2, beta.m, alpha.a, pi.m, pi.a, burnin, ndraws)
 }
 
 # normalize <- function(x)

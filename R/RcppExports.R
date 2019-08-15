@@ -5,7 +5,7 @@
 #' @importFrom Rcpp evalCpp
 NULL
 
-run_hdbm_mcmc <- function(Y, A, M, C1, C2, beta_m_init, alpha_a_init, pi_m_init, pi_a_init, burnin, nsamples) {
-    .Call('_hdbm_run_hdbm_mcmc', PACKAGE = 'hdbm', Y, A, M, C1, C2, beta_m_init, alpha_a_init, pi_m_init, pi_a_init, burnin, nsamples)
+run_hdbm_mcmc <- function(Y, A, M, C1, C2, beta_m_init, alpha_a_init, pi_m_init, pi_a_init, burnin, ndraws) {
+    .Call('_hdbm_run_hdbm_mcmc', PACKAGE = 'hdbm', Y, A, M, C1, C2, beta_m_init, alpha_a_init, pi_m_init, pi_a_init, burnin, ndraws)
 }
 

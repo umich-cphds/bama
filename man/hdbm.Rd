@@ -4,7 +4,7 @@
 \alias{hdbm}
 \title{High Dimensional Bayesian Mediation}
 \usage{
-hdbm(Y, A, M, C1, C2, beta.m, alpha.a, burnin, nsamples)
+hdbm(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws)
 }
 \arguments{
 \item{Y}{numeric response vector.}
@@ -23,7 +23,7 @@ hdbm(Y, A, M, C1, C2, beta.m, alpha.a, burnin, nsamples)
 
 \item{burnin}{number of iterations to run the MCMC before sampling.}
 
-\item{nsamples}{number of samples to draw from MCMC.}
+\item{ndraws}{number of draws to take from MCMC after the burnin period.}
 }
 \value{
 hdbm returns a list with 11 elements (each of length \code{nsamples}),

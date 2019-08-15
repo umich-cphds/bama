@@ -291,7 +291,7 @@ struct hdbm_mcmc {
 Rcpp::List run_hdbm_mcmc(arma::vec Y, arma::vec A, arma::mat M, arma::mat C1,
                           arma::mat C2, arma::vec beta_m_init, arma::vec
                           alpha_a_init, double pi_m_init, double pi_a_init,
-                          int burnin, int nsamples)
+                          int burnin, int ndraws)
 {
     hdbm_mcmc mcmc = hdbm_mcmc(Y, A, M, C1, C2, beta_m_init, alpha_a_init,
                                    pi_m_init, pi_a_init);
@@ -300,22 +300,22 @@ Rcpp::List run_hdbm_mcmc(arma::vec Y, arma::vec A, arma::mat M, arma::mat C1,
     for (int i = 0; i < burnin; ++i)
          mcmc.iterate(A, M, C1, C2);
 
-    auto beta_m    = Rcpp::NumericMatrix(nsamples, beta_m_init.n_elem);
-    auto r1        = Rcpp::NumericMatrix(nsamples, beta_m_init.n_elem);
-    auto alpha_a   = Rcpp::NumericMatrix(nsamples, alpha_a_init.n_elem);
-    auto r3        = Rcpp::NumericMatrix(nsamples, alpha_a_init.n_elem);
-    auto beta_a    = Rcpp::NumericVector(nsamples);
-    auto pi_m      = Rcpp::NumericVector(nsamples);
-    auto pi_a      = Rcpp::NumericVector(nsamples);
-    auto sigma_m0  = Rcpp::NumericVector(nsamples);
-    auto sigma_m1  = Rcpp::NumericVector(nsamples);
-    auto sigma_ma0 = Rcpp::NumericVector(nsamples);
-    auto sigma_ma1 = Rcpp::NumericVector(nsamples);
+    auto beta_m    = Rcpp::NumericMatrix(ndraws, beta_m_init.n_elem);
+    auto r1        = Rcpp::NumericMatrix(ndraws, beta_m_init.n_elem);
+    auto alpha_a   = Rcpp::NumericMatrix(ndraws, alpha_a_init.n_elem);
+    auto r3        = Rcpp::NumericMatrix(ndraws, alpha_a_init.n_elem);
+    auto beta_a    = Rcpp::NumericVector(ndraws);
+    auto pi_m      = Rcpp::NumericVector(ndraws);
+    auto pi_a      = Rcpp::NumericVector(ndraws);
+    auto sigma_m0  = Rcpp::NumericVector(ndraws);
+    auto sigma_m1  = Rcpp::NumericVector(ndraws);
+    auto sigma_ma0 = Rcpp::NumericVector(ndraws);
+    auto sigma_ma1 = Rcpp::NumericVector(ndraws);
 
     // Sample from the mcmc after the burnin period is complete.
     // After each sample the mcmc runs 50 iterations (presumably to reduce
     // autocorrelation).
-    for (int i = 0; i < nsamples; ++i) {
+    for (int i = 0; i < ndraws; ++i) {
 
         // Horrible Rcpp code to make it easy to fill in these matrices
         Rcpp::NumericMatrix::Row bm_row = beta_m(i, Rcpp::_);

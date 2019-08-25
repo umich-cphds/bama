@@ -53,7 +53,20 @@ high-dimensional mediation analysis, developed by Song et al (2018).
 the posterior inclusion probability for ranking mediators.
 }
 \details{
-TODO -- details
+\code{hdbm} uses two regression models for the two conditional relationships,
+\eqn{Y | A, M, C1} and \eqn{M | A, C2}. For the response model, we assume
+\eqn{A} and \eqn{M} are independent and model \eqn{Y} as
+\deqn{Y = M \beta_M  + A * \beta_A + C1* \beta_CY + \epsilon_Y}
+For the mediator model, \code{hdbm} uses the model
+\deqn{M = A * \alpha_A + C_M * \alpha_C2 + \epsilon_M}
+
+For high dimensional tractibility, \code{hdbm} employs continuous bayesian
+shrinkage priors to select mediators and makes the two following assumptions:
+First, it assumes that all the potential mediators contribute small effects
+in mediating the exposure-outcome relationship. Second, it assumes
+that only a small proportion of mediators exhibit large effects
+("active" mediators). \code{hdbm} uses a hastings within gibbs mcmc to
+generate posterior samples from the model.
 }
 \examples{
 library(hdbm)
@@ -65,15 +78,16 @@ A <- hdbm.data$a
 M <- as.matrix(hdbm.data[, paste0("m", 1:100)], nrow(hdbm.data))
 
 # We just include the intercept term in this example.
-C <- matrix(1, nrow(M), 1)
-beta.m <- rep(0, 100)
+C <- matrix(1, 1000, 1)
+beta.m  <- rep(0, 100)
 alpha.a <- rep(0, 100)
 
-set.seed(1245)
-output <- hdbm(Y, A, M, C, C, beta.m, alpha.a, burnin = 3000, nsamples = 100)
+set.seed(12345)
+hdbm.out <- hdbm(Y, A, M, C, C, beta.m, alpha.a,
+                   burnin = 3000, ndraws = 100)
 
 # Which mediators are active?
-active <- which(colSums(output$r1 * output$r3) > 50)
+active <- which(colSums(hdbm.out$r1 * hdbm.out$r3) > 50)
 colnames(M)[active]
 }
 \references{

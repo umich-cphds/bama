@@ -23,7 +23,7 @@ beta.m <- rep(0, 100)
 alpha.a <- rep(0, 100)
 
 set.seed(1245)
-output <- hdbm(Y, A, M, C, C, beta.m, alpha.a, burnin = 3000, nsamples = 100)
+output <- hdbm(Y, A, M, C, C, beta.m, alpha.a, burnin = 3000, ndraws = 100)
 
 # Which mediators are active?
 active <- which(colSums(output$r1 * output$r3) > 50)

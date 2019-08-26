@@ -73,7 +73,7 @@
 #' @references
 #' Yanyi Song, Xiang Zhou et al. Bayesian Shrinkage Estimation of High
 #' Dimensional Causal Mediation Effects in Omics Studies.
-#' [bioRxiv 467399](https://doi.org/10.1101/467399)
+#' bioRxiv \href{https://doi.org/10.1101/467399}{10.1101/467399}
 #' @export
 hdbm <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws)
 {

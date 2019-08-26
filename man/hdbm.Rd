@@ -93,5 +93,5 @@ colnames(M)[active]
 \references{
 Yanyi Song, Xiang Zhou et al. Bayesian Shrinkage Estimation of High
 Dimensional Causal Mediation Effects in Omics Studies.
-\href{https://doi.org/10.1101/467399}{bioRxiv 467399}
+bioRxiv \href{https://doi.org/10.1101/467399}{10.1101/467399}
 }

@@ -10,15 +10,16 @@ Authors@R:
            family = "Song",
            role = c("aut"),
            email = "yanys@umich.edu"))
-Description: Building on the potential outcome framework for causal inference,
-    we present a Bayesian mediation analysis method for an exposure, a
-    continuous outcome and high-dimensional mediators. We rely on two Bayesian
-    sparse linear mixed models to simultaneously analyze a relatively large
-    number of mediators with potentially a small number being truly active. This
-    sparsity assumption also allows us to extend univariate mediator analysis
-    by casting the identification of active mediators as a variable selection
-    problem and applying Bayesian methods with continuous shrinkage priors on
-    the effects.
+Description: Perform mediation analysis based off the potential outcome
+    framework for causal inference extended to a high dimensional Bayesian
+    setting. High dimensional Bayesian mediation (HDBM), developed by Song et
+    al (2018) <doi: 10.1101/467399>, relies on two Bayesian sparse linear mixed
+    models to simultaneously analyze a relatively large number of mediators for
+    a continuous exposure and outcome assuming a small number of mediators are
+    truly active. This sparsity assumption also allows the extension of
+    univariate mediator analysis by casting the identification of active
+    mediators as a variable selection problem and applying Bayesian methods
+    with continuous shrinkage priors on the effects.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
@@ -29,3 +30,7 @@ LinkingTo:
     RcppArmadillo
 Imports:
     Rcpp
+Suggests:
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

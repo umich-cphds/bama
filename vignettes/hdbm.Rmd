@@ -22,15 +22,15 @@ the posterior inclusion probability for ranking mediators.
 
 # Installation
 You can install `hdbm` from CRAN
-```{r}
+```{r, eval = FALSE}
 install.packages("hdbm")
 
 ```
 
 or from github via `devtools`
-```{r}
+```{r, eval = FALSE}
 # install.packages(devtools)
-devtools::install_packages("umich-cphds/hdbm", built_opts = c())
+devtools::install_github("umich-cphds/hdbm", built_opts = c())
 ```
 `hdbm` requires the R packages `Rcpp` and `RcppArmadillo`, so you may want to
 install / update them before downloading. If you decide to install `hdbm` from
@@ -53,11 +53,10 @@ head(hdbm.data[,1:10])
 The mediators have an internal correlation structure that is based off the
 covariance matrix from the Multi-Ethnic Study of Atherosclerosis (MESA) data.
 However,  `hdbm` does not model internal correlation between mediators.
-Instead, `hdbm` employs continuous bayesian shrinkage priors to select mediators
+Instead, `hdbm` employs continuous Bayesian shrinkage priors to select mediators
 and assumes that all the potential mediators contribute small effects
 in mediating the exposure-outcome relationship, but only a small proportion of
 mediators exhibit large effects.
-
 
 We use no adjustment covariates in this example, so we just include the
 intercept. In a real world situation, it may be beneficial to normalize the

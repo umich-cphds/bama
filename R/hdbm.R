@@ -1,7 +1,7 @@
 #' High Dimensional Bayesian Mediation
 #'
-#' A Bayesian inference method using continuous shrinkage priors for
-#' high-dimensional mediation analysis, developed by Song et al (2018).
+#' `hdbm` is a Bayesian inference method that uses continuous shrinkage priors
+#' for high-dimensional mediation analysis, developed by Song et al (2018).
 #' \code{hdbm} provides estimates for the regression coefficients as well as
 #' the posterior inclusion probability for ranking mediators.
 #'
@@ -12,13 +12,14 @@
 #' For the mediator model, \code{hdbm} uses the model
 #' \deqn{M = A * \alpha_A + C_M * \alpha_C2 + \epsilon_M}
 #'
-#' For high dimensional tractibility, \code{hdbm} employs continuous bayesian
+#' For high dimensional tractability, \code{hdbm} employs continuous bayesian
 #' shrinkage priors to select mediators and makes the two following assumptions:
 #' First, it assumes that all the potential mediators contribute small effects
 #' in mediating the exposure-outcome relationship. Second, it assumes
 #' that only a small proportion of mediators exhibit large effects
 #' ("active" mediators). \code{hdbm} uses a hastings within gibbs mcmc to
 #' generate posterior samples from the model.
+#'
 #' @param Y numeric response vector.
 #' @param A numeric exposure vector.
 #' @param M numeric matrix of mediators of Y and A.
@@ -29,7 +30,7 @@
 #' @param burnin number of iterations to run the MCMC before sampling.
 #' @param ndraws number of draws to take from MCMC after the burnin period.
 #' @return
-#' hdbm returns a list with 11 elements (each of length `nsamples`),
+#' hdbm returns a list with 11 elements (each of length `ndraws`),
 #' sampled from the burned in MCMC:
 #' \describe{
 #'   \item{beta.m}{Response model mediator coefficients}

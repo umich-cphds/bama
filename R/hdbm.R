@@ -109,20 +109,13 @@ hdbm <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws)
 
     if (!is.numeric(burnin))
         stop("burnin should be a nonnegative integer.")
+
+    if (!is.integer(burnin))
+        burnin <- as.integer(burnin)
     if (!is.numeric(ndraws))
         stop("ndraws should be a nonnegative integer.")
-
-    # Y <- normalize(Y)
-    # A <- normalize(A)
-    # M <- normalize(M)
+    if (!is.integer(ndraws))
+        ndraws <- as.integer(ndraws)
 
     run_hdbm_mcmc(Y, A, M, C1, C2, beta.m, alpha.a, pi.m, pi.a, burnin, ndraws)
 }
-
-# normalize <- function(x)
-# {
-#   if (is.vector(x))
-#     (x - mean(x)) / stats::sd(x)
-#   else
-#     apply(x, 2, function(x) (x - mean(x)) / sd(x))
-# }

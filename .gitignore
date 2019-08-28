@@ -2,3 +2,6 @@
 *.so
 *.tar.gz
 inst/doc
+*.Rcheck
+.RData
+.Rhistory

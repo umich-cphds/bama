@@ -7,43 +7,45 @@
 hdbm(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws)
 }
 \arguments{
-\item{Y}{numeric response vector.}
+\item{Y}{numeric outcome vector.}
 
 \item{A}{numeric exposure vector.}
 
 \item{M}{numeric matrix of mediators of Y and A.}
 
-\item{C1}{numeric matrix of extra covariates in the response model.}
+\item{C1}{numeric matrix of extra covariates in the outcome model}
 
-\item{C2}{numeric matrix of extra covariates in the mediator model.}
+\item{C2}{numeric matrix of extra covariates in the mediator model}
 
-\item{beta.m}{numeric vector of initial beta.m in the response model.}
+\item{beta.m}{numeric vector of initial beta.m in the outcome model}
 
-\item{alpha.a}{numeric vector of initial alpha.a in the mediator model.}
+\item{alpha.a}{numeric vector of initial alpha.a in the mediator model}
 
-\item{burnin}{number of iterations to run the MCMC before sampling.}
+\item{burnin}{number of iterations to run the MCMC before sampling}
 
-\item{ndraws}{number of draws to take from MCMC after the burnin period.}
+\item{ndraws}{number of draws to take from MCMC after the burnin period}
 }
 \value{
 hdbm returns a list with 11 elements (each of length \code{ndraws}),
 sampled from the burned in MCMC:
 \describe{
-\item{beta.m}{Response model mediator coefficients}
-\item{r1}{Whether or not each beta.m is active (1) or inactive (0)}
+\item{beta.m}{Outcome model mediator coefficients}
+\item{r1}{Whether or not each beta.m belongs to the larger normal
+component (1) or smaller normal component (0)}
 \item{alpha.a}{Rediator model exposure coefficients}
-\item{r3}{Whether or not alpha.a is active (1) or inactive (0)}
+\item{r3}{Whether or not each alpha.a belongs to the larger normal
+component (1) or smaller normal component (0)}
 \item{beta.a}{beta.a coefficient}
-\item{pi.m}{Proportion of non zero beta.m coefficients.}
-\item{pi.a}{Proportion of non zero alpha.a coefficients.}
-\item{sigma.m0}{Standard deviation of the inactive mediators in the
-response model.}
-\item{sigma.m1}{Standard deviation of the active mediators in the
-response model.}
-\item{sigma.ma0}{Standard deviation of the inactive mediators in the
-mediator model.}
-\item{sigma.ma1}{Standard deviation of the active mediators in the
-mediator model.}
+\item{pi.m}{Proportion of non zero beta.m coefficients}
+\item{pi.a}{Proportion of non zero alpha.a coefficients}
+\item{sigma.m0}{standard deviation of the smaller normal component for
+mediator-outcome coefficients (beta.m)}
+\item{sigma.m1}{standard deviation of the larger normal component for
+mediator-outcome coefficients (beta.m)}
+\item{sigma.ma0}{Standard deviation of the smaller normal component for
+exposure-mediator coefficients (alpha.a)}
+\item{sigma.ma1}{Standard deviation of the larger normal component for
+exposure-mediator coefficients (alpha.a)}
 }
 }
 \description{
@@ -54,11 +56,11 @@ the posterior inclusion probability for ranking mediators.
 }
 \details{
 \code{hdbm} uses two regression models for the two conditional relationships,
-\eqn{Y | A, M, C1} and \eqn{M | A, C2}. For the response model, we assume
-\eqn{A} and \eqn{M} are independent and model \eqn{Y} as
+\eqn{Y | A, M, C1} and \eqn{M | A, C2}. For the outcome model, \code{hdbm}
+uses
 \deqn{Y = M \beta_M  + A * \beta_A + C1* \beta_CY + \epsilon_Y}
 For the mediator model, \code{hdbm} uses the model
-\deqn{M = A * \alpha_A + C_M * \alpha_C2 + \epsilon_M}
+\deqn{M = A * \alpha_A + C2 * \alpha_C2 + \epsilon_M}
 
 For high dimensional tractability, \code{hdbm} employs continuous bayesian
 shrinkage priors to select mediators and makes the two following assumptions:
@@ -84,7 +86,7 @@ alpha.a <- rep(0, 100)
 
 set.seed(12345)
 hdbm.out <- hdbm(Y, A, M, C, C, beta.m, alpha.a,
-                   burnin = 3000, ndraws = 100)
+                   burnin = 1000, ndraws = 100)
 
 # Which mediators are active?
 active <- which(colSums(hdbm.out$r1 * hdbm.out$r3) > 50)
@@ -94,4 +96,7 @@ colnames(M)[active]
 Yanyi Song, Xiang Zhou et al. Bayesian Shrinkage Estimation of High
 Dimensional Causal Mediation Effects in Omics Studies.
 bioRxiv \href{https://doi.org/10.1101/467399}{10.1101/467399}
+}
+\author{
+Alexander Rix
 }

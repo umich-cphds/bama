@@ -36,8 +36,8 @@ devtools::install_github("umich-cphds/hdbm", built_opts = c())
 install / update them before downloading. If you decide to install `hdbm` from
 source (eg github), you will need a C++ compiler that supports C++11. on Windows
 this can accomplished by installing
-[Rtools](https://cran.r-project.org/bin/windows/Rtools/) and on macOS,
-[Xcode](https://apps.apple.com/us/app/xcode/id497799835?mt=12).
+[Rtools](https://cran.r-project.org/bin/windows/Rtools/) and
+[Xcode](https://apps.apple.com/us/app/xcode/id497799835?mt=12) on macOS.
 
 # Example problem
 `hdbm` contains a semi-synthetic example data set, `hdbm.data` that is used in
@@ -59,8 +59,9 @@ in mediating the exposure-outcome relationship, but only a small proportion of
 mediators exhibit large effects.
 
 We use no adjustment covariates in this example, so we just include the
-intercept. In a real world situation, it may be beneficial to normalize the
-input data.
+intercept. Also, in a real world situation, it may be beneficial to normalize
+the input data.
+
 ```{r}
 
 Y <- hdbm.data$y
@@ -70,19 +71,22 @@ A <- hdbm.data$a
 M <- as.matrix(hdbm.data[, paste0("m", 1:100)], nrow(hdbm.data))
 
 # We just include the intercept term in this example.
-C <- matrix(1, 1000, 1)
-beta.m  <- rep(0, 100)
-alpha.a <- rep(0, 100)
+C <- matrix(1, nrow(M), 1)
+beta.m  <- rep(0, ncol(M))
+alpha.a <- rep(0, ncol(M))
 
 set.seed(12345)
-# burn = 3000 just for this example. It is recommended to pick a larger number.
+# It is recommended to pick a larger number for burnin.
 hdbm.out <- hdbm(Y, A, M, C, C, beta.m, alpha.a,
-                   burnin = 3000, ndraws = 100)
+                   burnin = 1000, ndraws = 100)
 
 # Which mediators are active?
 active <- which(colSums(hdbm.out$r1 * hdbm.out$r3) > 100 / 2)
 colnames(M)[active]
 ```
+
+Here, we calculate the posterior probability \eqn{r1 = r3 = 1 | Data}, and
+classify a mediator as active if its posterior probability is greater than 0.5.
 
 # Reference
 Yanyi Song, Xiang Zhou et al. Bayesian Shrinkage Estimation of

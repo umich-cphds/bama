@@ -13,7 +13,7 @@ Authors@R:
 Description: Perform mediation analysis in the presence of high-dimensional
     mediators based on the potential outcome framework. High dimensional
     Bayesian mediation (HDBM), developed by Song et al (2018)
-    <doi: 10.1101/467399>, relies on two Bayesian sparse linear mixed models to
+    <doi:10.1101/467399>, relies on two Bayesian sparse linear mixed models to
     simultaneously analyze a relatively large number of mediators for a
     continuous exposure and outcome assuming a small number of mediators are
     truly active. This sparsity assumption also allows the extension of

@@ -12,13 +12,13 @@
 #' For the mediator model, \code{hdbm} uses the model
 #' \deqn{M = A * \alpha_A + C2 * \alpha_C2 + \epsilon_M}
 #'
-#' For high dimensional tractability, \code{hdbm} employs continuous bayesian
+#' For high dimensional tractability, \code{hdbm} employs continuous Bayesian
 #' shrinkage priors to select mediators and makes the two following assumptions:
 #' First, it assumes that all the potential mediators contribute small effects
 #' in mediating the exposure-outcome relationship. Second, it assumes
 #' that only a small proportion of mediators exhibit large effects
-#' ("active" mediators). \code{hdbm} uses a hastings within gibbs mcmc to
-#' generate posterior samples from the model.
+#' ("active" mediators). \code{hdbm} uses a Metropolis-Hastings within Gibbs
+#' MCMC to generate posterior samples from the model.
 #'
 #' @param Y numeric outcome vector.
 #' @param A numeric exposure vector.
@@ -36,7 +36,7 @@
 #'   \item{beta.m}{Outcome model mediator coefficients}
 #'   \item{r1}{Whether or not each beta.m belongs to the larger normal
 #'     component (1) or smaller normal component (0)}
-#'   \item{alpha.a}{Rediator model exposure coefficients}
+#'   \item{alpha.a}{Mediator model exposure coefficients}
 #'   \item{r3}{Whether or not each alpha.a belongs to the larger normal
 #'     component (1) or smaller normal component (0)}
 #'   \item{beta.a}{beta.a coefficient}

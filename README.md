@@ -3,7 +3,7 @@ should help you get started.
 # Install
 You can install `hdbm` via devtools:
 ```
-devtools::install_github("umich-cphds/hdbm")
+devtools::install_github("umich-cphds/hdbm", build_opts = c())
 ```
 
 # Example

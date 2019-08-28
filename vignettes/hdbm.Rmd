@@ -34,9 +34,9 @@ devtools::install_github("umich-cphds/hdbm", built_opts = c())
 ```
 `hdbm` requires the R packages `Rcpp` and `RcppArmadillo`, so you may want to
 install / update them before downloading. If you decide to install `hdbm` from
-source (eg github), you will need a C++ compiler that supports C++11. on Windows
+source (eg github), you will need a C++ compiler that supports C++11. On Windows
 this can accomplished by installing
-[Rtools](https://cran.r-project.org/bin/windows/Rtools/) and
+[Rtools](https://cran.r-project.org/bin/windows/Rtools/), and
 [Xcode](https://apps.apple.com/us/app/xcode/id497799835?mt=12) on MacOS.
 
 # Example problem
@@ -72,6 +72,8 @@ M <- as.matrix(hdbm.data[, paste0("m", 1:100)], nrow(hdbm.data))
 
 # We just include the intercept term in this example.
 C <- matrix(1, nrow(M), 1)
+
+# Initial guesses for coefficients
 beta.m  <- rep(0, ncol(M))
 alpha.a <- rep(0, ncol(M))
 
@@ -85,8 +87,9 @@ active <- which(colSums(hdbm.out$r1 * hdbm.out$r3) > 100 / 2)
 colnames(M)[active]
 ```
 
-Here, we calculate the posterior probability \eqn{r1 = r3 = 1 | Data}, and
-classify a mediator as active if its posterior probability is greater than 0.5.
+Here, we calculate the posterior inclusion probability `r1 = r3 = 1 | Data`, 
+and classify a mediator as active if its posterior probability is greater than
+0.5.
 
 # Reference
 Yanyi Song, Xiang Zhou et al. Bayesian Shrinkage Estimation of

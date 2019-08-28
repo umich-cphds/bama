@@ -1,10 +1,22 @@
-`hdbm` is currently beta software in the process of being polished, but this
-should help you get started.
+`hdbm` is a Bayesian inference method that uses continuous shrinkage priors for
+high-dimensional mediation analysis, developed by Song et al (2018).
+`hdbm` provides estimates for the regression coefficients as well as
+the posterior inclusion probability for ranking mediators.
+
 # Install
-You can install `hdbm` via devtools:
+You can install `hdbm` via CRAN
+
+```
+install.packages("hdbm")
+```
+Or devtools
 ```
 devtools::install_github("umich-cphds/hdbm", build_opts = c())
 ```
+
+If you wish to install the package via devtools, you will need a C++ compiler
+installed. This can be accomplished by installing Rtools on Windows and Xcode
+on MacOS.
 
 # Example
 Taken from the `hdbm` help file

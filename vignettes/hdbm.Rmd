@@ -37,7 +37,7 @@ install / update them before downloading. If you decide to install `hdbm` from
 source (eg github), you will need a C++ compiler that supports C++11. on Windows
 this can accomplished by installing
 [Rtools](https://cran.r-project.org/bin/windows/Rtools/) and
-[Xcode](https://apps.apple.com/us/app/xcode/id497799835?mt=12) on macOS.
+[Xcode](https://apps.apple.com/us/app/xcode/id497799835?mt=12) on MacOS.
 
 # Example problem
 `hdbm` contains a semi-synthetic example data set, `hdbm.data` that is used in

@@ -7,9 +7,9 @@
 hdbm(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws)
 }
 \arguments{
-\item{Y}{numeric outcome vector.}
+\item{Y}{numeric outcome vector}
 
-\item{A}{numeric exposure vector.}
+\item{A}{numeric exposure vector}
 
 \item{M}{numeric matrix of mediators of Y and A.}
 
@@ -85,12 +85,11 @@ beta.m  <- rep(0, 100)
 alpha.a <- rep(0, 100)
 
 set.seed(12345)
-hdbm.out <- hdbm(Y, A, M, C, C, beta.m, alpha.a,
-                   burnin = 1000, ndraws = 100)
+out <- hdbm(Y, A, M, C, C, beta.m, alpha.a, burnin = 1000, ndraws = 100)
 
-# Which mediators are active?
-active <- which(colSums(hdbm.out$r1 * hdbm.out$r3) > 50)
-colnames(M)[active]
+# The package includes a function to summarise output from 'hdbm'
+summary <- summary(out)
+head(summary)
 }
 \references{
 Yanyi Song, Xiang Zhou et al. Bayesian Shrinkage Estimation of High

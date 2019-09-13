@@ -14,6 +14,8 @@
 #define L_M1 1.0
 #define L    1.0
 
+#define EPSILON 1e-12
+
 // returns 1 with probability p
 int rand_bernoulli(double p)
 {
@@ -98,17 +100,29 @@ struct hdbm_mcmc {
         r3 = arma::vec(alpha_a.n_elem, arma::fill::zeros);
 
         norm2_a = dot(A, A);
+        if (norm2_a < EPSILON)
+            Rcpp::stop("A norm is very small\n");
+
         norm2_m = arma::vec(M.n_cols);
-        for (arma::uword j = 0; j < M.n_cols; ++j)
+        for (arma::uword j = 0; j < M.n_cols; ++j) {
             norm2_m[j] = dot(M.col(j), M.col(j));
+            if (norm2_m[j] < EPSILON)
+                Rcpp::stop("M[, %i] norm is very small\n", j + 1);
+        }
 
         norm2_c1 = arma::vec(C1.n_cols);
-        for (arma::uword j = 0; j < C1.n_cols; ++j)
+        for (arma::uword j = 0; j < C1.n_cols; ++j) {
             norm2_c1[j] = dot(C1.col(j), C1.col(j));
+            if (norm2_c1[j] < EPSILON)
+                Rcpp::stop("C1[, %i] norm is very small\n", j + 1);
+        }
 
         norm2_c2 = arma::vec(C2.n_cols);
-        for (arma::uword j = 0; j < C2.n_cols; ++j)
+        for (arma::uword j = 0; j < C2.n_cols; ++j) {
             norm2_c2[j] = dot(C2.col(j), C2.col(j));
+            if (norm2_c2[j] < EPSILON)
+                Rcpp::stop("C2[, %i] norm is very small\n", j + 1);
+        }
 
         this->pi_m = pi_m;
         this->pi_a = pi_a;
@@ -263,6 +277,7 @@ struct hdbm_mcmc {
             m_pi_m = 1.0 / m_pi_m;
         if (m_pi_m  < 1.0 / q)
             m_pi_m = 1.0 / (q * q * m_pi_m);
+
         if (m_pi_a  > 1.0)
             m_pi_a = 1.0 / m_pi_a;
         if (m_pi_a  < 1.0 / q)

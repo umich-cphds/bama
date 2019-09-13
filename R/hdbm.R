@@ -20,8 +20,8 @@
 #' ("active" mediators). \code{hdbm} uses a Metropolis-Hastings within Gibbs
 #' MCMC to generate posterior samples from the model.
 #'
-#' @param Y numeric outcome vector.
-#' @param A numeric exposure vector.
+#' @param Y numeric outcome vector
+#' @param A numeric exposure vector
 #' @param M numeric matrix of mediators of Y and A.
 #' @param C1 numeric matrix of extra covariates in the outcome model
 #' @param C2 numeric matrix of extra covariates in the mediator model
@@ -66,12 +66,11 @@
 #' alpha.a <- rep(0, 100)
 #'
 #' set.seed(12345)
-#' hdbm.out <- hdbm(Y, A, M, C, C, beta.m, alpha.a,
-#'                    burnin = 1000, ndraws = 100)
+#' out <- hdbm(Y, A, M, C, C, beta.m, alpha.a, burnin = 1000, ndraws = 100)
 #'
-#' # Which mediators are active?
-#' active <- which(colSums(hdbm.out$r1 * hdbm.out$r3) > 50)
-#' colnames(M)[active]
+#' # The package includes a function to summarise output from 'hdbm'
+#' summary <- summary(out)
+#' head(summary)
 #' @references
 #' Yanyi Song, Xiang Zhou et al. Bayesian Shrinkage Estimation of High
 #' Dimensional Causal Mediation Effects in Omics Studies.
@@ -81,41 +80,41 @@
 hdbm <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws)
 {
     if (!is.vector(Y) || !is.numeric(Y))
-        stop("Y must be a numeric vector.")
+        stop("'Y' must be a numeric vector.")
     else if (is.integer(Y))
         Y <- as.double(Y)
 
     if (any(is.na(Y)))
-        stop("Y must not have missing values.")
+        stop("'Y' must not have missing values.")
 
     if (!is.vector(A) || !is.numeric(A))
-        stop("A should be a numeric vector.")
+        stop("'A' should be a numeric vector.")
     else if (is.integer(A))
         A <- as.double(A)
 
     if (any(is.na(A)))
-        stop("A cannot have missing values.")
+        stop("'A' cannot have missing values.")
 
     if (length(A) != length(Y))
-        stop("Lengths of A and Y do not match.")
+        stop("Lengths of 'A' and 'Y' do not match.")
 
     if (!is.matrix(M) || !is.numeric(M))
-        stop("M must be a numeric matrix.")
+        stop("'M' must be a numeric matrix.")
     else if (is.integer(M))
         M <- matrix(as.double(M), nrow(M), ncol(M))
 
     if (any(is.na(M)))
-        stop("M cannot have missing values.")
+        stop("'M' cannot have missing values.")
 
     if (nrow(M) != length(Y))
-        stop("The number of rows in M does not match the length of Y.")
+        stop("The number of rows in 'M' does not match the length of 'Y'.")
 
     if (!is.vector(beta.m) || !is.numeric(beta.m))
-        stop("beta.m must be a numeric vector")
+        stop("'beta.m' must be a numeric vector")
     if (is.integer(beta.m))
         beta.m <- as.double(beta.m)
     if (any(is.na(beta.m)))
-        stop("beta.m cannot contain missing values.")
+        stop("'beta.m' cannot contain missing values.")
 
     pi.m <- mean(abs(beta.m)  > 1e-12)
     pi.a <- mean(abs(alpha.a) > 1e-12)
@@ -126,14 +125,74 @@ hdbm <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws)
         pi.a <- 0.5
 
     if (!is.numeric(burnin))
-        stop("burnin should be a nonnegative integer.")
+        stop("'burnin' should be a nonnegative integer.")
 
     if (!is.integer(burnin))
         burnin <- as.integer(burnin)
     if (!is.numeric(ndraws))
-        stop("ndraws should be a nonnegative integer.")
+        stop("'ndraws' should be a nonnegative integer.")
     if (!is.integer(ndraws))
         ndraws <- as.integer(ndraws)
 
-    run_hdbm_mcmc(Y, A, M, C1, C2, beta.m, alpha.a, pi.m, pi.a, burnin, ndraws)
+    hdbm.out <- run_hdbm_mcmc(Y, A, M, C1, C2, beta.m, alpha.a, pi.m, pi.a,
+                                  burnin, ndraws)
+
+    colnames(hdbm.out$beta.m)  <- colnames(M)
+    colnames(hdbm.out$alpha.a) <- colnames(M)
+    colnames(hdbm.out$r1)      <- colnames(M)
+    colnames(hdbm.out$r3)      <- colnames(M)
+
+    structure(hdbm.out, class = "hdbm")
+}
+
+#' Summarise objects of type "hdbm"
+#'
+#' @return A data.frame with 4 elements. The beta.m estimates, the estimates'
+#'     *credible* interval (which by default is 95%), and their posterior inclusion
+#'     probability (pip).
+#' @param object An object of class "hdbm".
+#' @param rank Whether or not to rank the output by posterior inclusion
+#'     probability. Default is TRUE.
+#' @param ci The credible interval to calculate. \code{ci} should be a length 2
+#'     numeric vector specifiying the upper and lower bounds of the CI. By
+#'     default, \code{ci = c(0.025, .975)}.
+#' @param ... Additonal optional arguments to \code{summary}
+#' @export
+summary.hdbm <- function(object, rank = F, ci = c(0.025, .975), ...)
+{
+    if (class(object) != "hdbm")
+        stop("'object' is not an hdbm object.")
+
+    if (!is.logical(rank) || length(rank) != 1)
+        stop("'rank' should be a length 1 logical.")
+
+    if (!is.numeric(ci) || length(ci) != 2)
+        stop("'ci' should be a length 2 numeric.")
+    if (ci[1] >= ci[2])
+        stop("'ci[1]' should be less than 'ci[2]'.")
+
+    pip    <- colMeans(object$r1 * object$r3)
+    beta.m <- colMeans(object$beta.m)
+
+    credible.l <- apply(object$beta.m, 2, stats::quantile, probs = ci[1])
+    credible.h <- apply(object$beta.m, 2, stats::quantile, probs = ci[2])
+
+    out <- data.frame(estimate = beta.m, ci.lower = credible.l,
+                          ci.upper = credible.h, pip = pip)
+    if (rank)
+        out <- out[order(pip, decreasing = T), ]
+
+    out
+}
+
+
+#' Printing hdbm objects
+#'
+#' Print a hdbm object.
+#' @param x An object of class 'hdbm'.
+#' @param ... Additional arguments to pass to print.data.frame or summary.hdbm
+#' @export
+print.hdbm <- function(x , ...)
+{
+    print(summary(x, ...), ...)
 }

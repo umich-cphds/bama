@@ -3,7 +3,7 @@ high-dimensional mediation analysis, developed by Song et al (2018).
 `hdbm` provides estimates for the regression coefficients as well as
 the posterior inclusion probability for ranking mediators.
 
-# Install
+# Installation
 You can install `hdbm` via CRAN
 
 ```

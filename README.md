@@ -1,3 +1,5 @@
+# hdbm
+
 `hdbm` is a Bayesian inference method that uses continuous shrinkage priors for
 high-dimensional mediation analysis, developed by Song et al (2018).
 `hdbm` provides estimates for the regression coefficients as well as

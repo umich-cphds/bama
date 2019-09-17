@@ -1,12 +1,12 @@
 `bama` is a Bayesian inference method that uses continuous shrinkage priors for
-Bayesian mediation analysis, developed by Song et al (2018).
-`bama` provides estimates for the regression coefficients as well as
-the posterior inclusion probability for ranking mediators.
+Bayesian mediation analysis, developed by Song et al (2018). `bama` provides
+estimates for the regression coefficients as well as the posterior inclusion
+probability for ranking mediators.
 
 # Install
 You can install `bama` via CRAN
 
-```
+# Installation
 install.packages("bama")
 ```
 Or devtools

@@ -1,7 +1,7 @@
 // Author: Alexander Rix
 // Date  : 8/7/19
 // Description:
-// hdbm.cpp implements High Dimensional Bayesian Mediation, developed by Song
+// bama.cpp implements High Dimensional Bayesian Mediation, developed by Song
 // et al. This version is a heavily optimized adapation of the original
 // implementation by Song.
 
@@ -37,7 +37,7 @@ double rand_norm(double mu, double sigma_sq)
 
 // Putting the MCMC into a class is technically unnecessary but it simplifies
 // the function signatures considerably.
-struct hdbm_mcmc {
+struct bama_mcmc {
 
     double sigma_e;
     double sigma_g;
@@ -71,7 +71,7 @@ struct hdbm_mcmc {
     double pi_m;
     double pi_a;
 
-    hdbm_mcmc(arma::vec Y, arma::vec A, arma::mat M, arma::mat C1, arma::mat C2,
+    bama_mcmc(arma::vec Y, arma::vec A, arma::mat M, arma::mat C1, arma::mat C2,
                   arma::vec beta_m, arma::vec alpha_a, double pi_m, double pi_a)
     {
         sigma_m0  = rand_invgamma(K, L_M0);
@@ -300,15 +300,15 @@ struct hdbm_mcmc {
 };
 
 // [[Rcpp::depends(RcppArmadillo)]]
-// [[Rcpp::export]]
-//' @useDynLib hdbm
+//' @useDynLib bama
 //' @importFrom Rcpp evalCpp
-Rcpp::List run_hdbm_mcmc(arma::vec Y, arma::vec A, arma::mat M, arma::mat C1,
+// [[Rcpp::export]]
+Rcpp::List run_bama_mcmc(arma::vec Y, arma::vec A, arma::mat M, arma::mat C1,
                           arma::mat C2, arma::vec beta_m_init, arma::vec
                           alpha_a_init, double pi_m_init, double pi_a_init,
                           int burnin, int ndraws)
 {
-    hdbm_mcmc mcmc = hdbm_mcmc(Y, A, M, C1, C2, beta_m_init, alpha_a_init,
+    bama_mcmc mcmc = bama_mcmc(Y, A, M, C1, C2, beta_m_init, alpha_a_init,
                                    pi_m_init, pi_a_init);
 
     // Run mcmc for the number of specified burnin iterations.

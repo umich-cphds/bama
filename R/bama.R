@@ -1,23 +1,23 @@
 #' High Dimensional Bayesian Mediation
 #'
-#' `hdbm` is a Bayesian inference method that uses continuous shrinkage priors
+#' `bama` is a Bayesian inference method that uses continuous shrinkage priors
 #' for high-dimensional mediation analysis, developed by Song et al (2018).
-#' \code{hdbm} provides estimates for the regression coefficients as well as
+#' \code{bama} provides estimates for the regression coefficients as well as
 #' the posterior inclusion probability for ranking mediators.
 #'
-#' \code{hdbm} uses two regression models for the two conditional relationships,
-#' \eqn{Y | A, M, C1} and \eqn{M | A, C2}. For the outcome model, \code{hdbm}
+#' \code{bama} uses two regression models for the two conditional relationships,
+#' \eqn{Y | A, M, C1} and \eqn{M | A, C2}. For the outcome model, \code{bama}
 #' uses
 #' \deqn{Y = M \beta_M  + A * \beta_A + C1* \beta_CY + \epsilon_Y}
-#' For the mediator model, \code{hdbm} uses the model
+#' For the mediator model, \code{bama} uses the model
 #' \deqn{M = A * \alpha_A + C2 * \alpha_C2 + \epsilon_M}
 #'
-#' For high dimensional tractability, \code{hdbm} employs continuous Bayesian
+#' For high dimensional tractability, \code{bama} employs continuous Bayesian
 #' shrinkage priors to select mediators and makes the two following assumptions:
 #' First, it assumes that all the potential mediators contribute small effects
 #' in mediating the exposure-outcome relationship. Second, it assumes
 #' that only a small proportion of mediators exhibit large effects
-#' ("active" mediators). \code{hdbm} uses a Metropolis-Hastings within Gibbs
+#' ("active" mediators). \code{bama} uses a Metropolis-Hastings within Gibbs
 #' MCMC to generate posterior samples from the model.
 #'
 #' @param Y numeric outcome vector
@@ -30,7 +30,7 @@
 #' @param burnin number of iterations to run the MCMC before sampling
 #' @param ndraws number of draws to take from MCMC after the burnin period
 #' @return
-#' hdbm returns a list with 11 elements (each of length `ndraws`),
+#' bama returns a list with 11 elements (each of length `ndraws`),
 #' sampled from the burned in MCMC:
 #' \describe{
 #'   \item{beta.m}{Outcome model mediator coefficients}
@@ -52,13 +52,13 @@
 #'     exposure-mediator coefficients (alpha.a)}
 #' }
 #' @examples
-#' library(hdbm)
+#' library(bama)
 #'
-#' Y <- hdbm.data$y
-#' A <- hdbm.data$a
+#' Y <- bama.data$y
+#' A <- bama.data$a
 #'
 #' # grab the mediators from the example data.frame
-#' M <- as.matrix(hdbm.data[, paste0("m", 1:100)], nrow(hdbm.data))
+#' M <- as.matrix(bama.data[, paste0("m", 1:100)], nrow(bama.data))
 #'
 #' # We just include the intercept term in this example.
 #' C <- matrix(1, 1000, 1)
@@ -66,9 +66,9 @@
 #' alpha.a <- rep(0, 100)
 #'
 #' set.seed(12345)
-#' out <- hdbm(Y, A, M, C, C, beta.m, alpha.a, burnin = 1000, ndraws = 100)
+#' out <- bama(Y, A, M, C, C, beta.m, alpha.a, burnin = 1000, ndraws = 100)
 #'
-#' # The package includes a function to summarise output from 'hdbm'
+#' # The package includes a function to summarise output from 'bama'
 #' summary <- summary(out)
 #' head(summary)
 #' @references
@@ -77,7 +77,7 @@
 #' bioRxiv \href{https://doi.org/10.1101/467399}{10.1101/467399}
 #' @author Alexander Rix
 #' @export
-hdbm <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws)
+bama <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws)
 {
     if (!is.vector(Y) || !is.numeric(Y))
         stop("'Y' must be a numeric vector.")
@@ -134,23 +134,25 @@ hdbm <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws)
     if (!is.integer(ndraws))
         ndraws <- as.integer(ndraws)
 
-    hdbm.out <- run_hdbm_mcmc(Y, A, M, C1, C2, beta.m, alpha.a, pi.m, pi.a,
+    bama.out <- run_bama_mcmc(Y, A, M, C1, C2, beta.m, alpha.a, pi.m, pi.a,
                                   burnin, ndraws)
 
-    colnames(hdbm.out$beta.m)  <- colnames(M)
-    colnames(hdbm.out$alpha.a) <- colnames(M)
-    colnames(hdbm.out$r1)      <- colnames(M)
-    colnames(hdbm.out$r3)      <- colnames(M)
+    colnames(bama.out$beta.m)  <- colnames(M)
+    colnames(bama.out$alpha.a) <- colnames(M)
+    colnames(bama.out$r1)      <- colnames(M)
+    colnames(bama.out$r3)      <- colnames(M)
 
-    structure(hdbm.out, class = "hdbm")
+    structure(bama.out, class = "bama")
 }
 
-#' Summarise objects of type "hdbm"
+#' Summarise objects of type "bama"
 #'
+#' summary.bama summarises the 'beta.m' estimates from \code{bama} and generates
+#' an overall estimate, credible interval, and posterior inclusion probability.
 #' @return A data.frame with 4 elements. The beta.m estimates, the estimates'
-#'     *credible* interval (which by default is 95%), and their posterior inclusion
-#'     probability (pip).
-#' @param object An object of class "hdbm".
+#'     *credible* interval (which by default is 95\%), and the posterior
+#'      inclusion probability (pip) of each 'beta.m'.
+#' @param object An object of class "bama".
 #' @param rank Whether or not to rank the output by posterior inclusion
 #'     probability. Default is TRUE.
 #' @param ci The credible interval to calculate. \code{ci} should be a length 2
@@ -158,10 +160,10 @@ hdbm <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws)
 #'     default, \code{ci = c(0.025, .975)}.
 #' @param ... Additonal optional arguments to \code{summary}
 #' @export
-summary.hdbm <- function(object, rank = F, ci = c(0.025, .975), ...)
+summary.bama <- function(object, rank = F, ci = c(0.025, .975), ...)
 {
-    if (class(object) != "hdbm")
-        stop("'object' is not an hdbm object.")
+    if (class(object) != "bama")
+        stop("'object' is not an bama object.")
 
     if (!is.logical(rank) || length(rank) != 1)
         stop("'rank' should be a length 1 logical.")
@@ -186,13 +188,13 @@ summary.hdbm <- function(object, rank = F, ci = c(0.025, .975), ...)
 }
 
 
-#' Printing hdbm objects
+#' Printing bama objects
 #'
-#' Print a hdbm object.
-#' @param x An object of class 'hdbm'.
-#' @param ... Additional arguments to pass to print.data.frame or summary.hdbm
+#' Print a bama object.
+#' @param x An object of class 'bama'.
+#' @param ... Additional arguments to pass to print.data.frame or summary.bama
 #' @export
-print.hdbm <- function(x , ...)
+print.bama <- function(x , ...)
 {
     print(summary(x, ...), ...)
 }

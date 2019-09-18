@@ -8,6 +8,8 @@ matrix:
   - r: oldrel
   - r: release
     os: osx
+    before_install:
+      - sudo tlmgr install framed titling
     osx_image: xcode7.3
 
 cache: packages

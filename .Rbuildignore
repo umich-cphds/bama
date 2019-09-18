@@ -1,7 +1,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^\*.Rcheck
-^hdbm_*
+^bama_*
 cran-comments.md
 ^CRAN-RELEASE$
 ^README\.Rmd$

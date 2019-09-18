@@ -35,7 +35,10 @@ installed. This can be accomplished by installing Rtools on Windows and Xcode
 on MacOS.
 
 ## Example
-Taken from the `bama` help file
+This example is taken from the `bama` help file to help you get started using
+the method. Please check the documentation of the function by typing
+`?bama::bama`, and the vignette by typing `vingette("bama")` in R.
+
 ```{r}
 library(bama)
 

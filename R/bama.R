@@ -149,9 +149,9 @@ bama <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws)
     structure(bama.out, class = "bama")
 }
 
-#' Summarise objects of type "bama"
+#' Summarize objects of type "bama"
 #'
-#' summary.bama summarises the 'beta.m' estimates from \code{bama} and generates
+#' summary.bama summarizes the 'beta.m' estimates from \code{bama} and generates
 #' an overall estimate, credible interval, and posterior inclusion probability.
 #' @return A data.frame with 4 elements. The beta.m estimates, the estimates'
 #'     *credible* interval (which by default is 95\%), and the posterior
@@ -160,9 +160,9 @@ bama <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws)
 #' @param rank Whether or not to rank the output by posterior inclusion
 #'     probability. Default is TRUE.
 #' @param ci The credible interval to calculate. \code{ci} should be a length 2
-#'     numeric vector specifiying the upper and lower bounds of the CI. By
+#'     numeric vector specifying the upper and lower bounds of the CI. By
 #'     default, \code{ci = c(0.025, .975)}.
-#' @param ... Additonal optional arguments to \code{summary}
+#' @param ... Additional optional arguments to \code{summary}
 #' @export
 summary.bama <- function(object, rank = F, ci = c(0.025, .975), ...)
 {

@@ -119,10 +119,14 @@ bama <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws)
     pi.m <- mean(abs(beta.m)  > 1e-12)
     pi.a <- mean(abs(alpha.a) > 1e-12)
 
-    if (pi.m == 1 || pi.m == 0)
-        pi.m <- 0.5
-    if (pi.a == 1 || pi.a == 0)
-        pi.a <- 0.5
+    if (pi.m == 1)
+        pi.m <- 0.9
+    if (pi.m == 0)
+        pi.m <- 0.1
+    if (pi.a == 1)
+        pi.a <- 0.9
+    if (pi.a == 0)
+        pi.a <- 0.1
 
     if (!is.numeric(burnin))
         stop("'burnin' should be a nonnegative integer.")

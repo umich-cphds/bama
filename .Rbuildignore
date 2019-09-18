@@ -4,3 +4,4 @@
 ^hdbm_*
 cran-comments.md
 ^CRAN-RELEASE$
+^README\.Rmd$

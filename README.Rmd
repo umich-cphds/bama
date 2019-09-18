@@ -12,12 +12,13 @@ knitr::opts_chunk$set(
   out.width = "100%"
 )
 ```
-# bama
+# Bayesian Mediation Analysis
 
 `bama` is a Bayesian inference method that uses continuous shrinkage priors for
 high-dimensional Bayesian mediation analysis, developed by Song et al (2018).
 `bama` provides estimates for the regression coefficients as well as
 the posterior inclusion probability for ranking mediators.
+
 ## Installation
 You can install `bama` via CRAN
 
@@ -34,7 +35,6 @@ installed. This can be accomplished by installing Rtools on Windows and Xcode
 on MacOS.
 
 ## Example
-
 Taken from the `bama` help file
 ```{r}
 library(bama)

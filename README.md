@@ -1,6 +1,8 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-Bayesian Mediation Analysis
-===========================
+<!-- badges: start -->
+[![Travis build
+status](https://travis-ci.org/umich-cphds/bama.svg?branch=master)](https://travis-ci.org/umich-cphds/bama)
+<!-- badges: end --> \# Bayesian Mediation Analysis
 
 `bama` is a Bayesian inference method that uses continuous shrinkage
 priors for high-dimensional Bayesian mediation analysis, developed by

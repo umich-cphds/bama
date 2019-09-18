@@ -15,8 +15,6 @@ knitr::opts_chunk$set(
 
 # bama
 
-<!-- badges: start -->
-<!-- badges: end -->
 
 # bama
 
@@ -29,22 +27,22 @@ the posterior inclusion probability for ranking mediators.
 ## Installation
 You can install `bama` via CRAN
 
-```
+```{r, eval = F}
 install.packages("bama")
 ```
 Or devtools
-```
+```{r, eval = F}
 devtools::install_github("umich-cphds/bama", build_opts = c())
 ```
 
 If you wish to install the package via devtools, you will need a C++ compiler
 installed. This can be accomplished by installing Rtools on Windows and Xcode
 on MacOS.
-```
+
 ## Example
 
 Taken from the `bama` help file
-```
+```{r}
 library(bama)
 
 Y <- bama.data$y
@@ -55,15 +53,14 @@ M <- as.matrix(bama.data[, paste0("m", 1:100)], nrow(bama.data))
 
 # We just include the intercept term in this example.
 C <- matrix(1, nrow(M), 1)
-beta.m <- rep(0, 100)
+beta.m  <- rep(0, 100)
 alpha.a <- rep(0, 100)
 
 set.seed(1245)
-output <- bama(Y, A, M, C, C, beta.m, alpha.a, burnin = 3000, ndraws = 100)
+bama.out <- bama(Y, A, M, C, C, beta.m, alpha.a, burnin = 3000, ndraws = 100)
 
-# Which mediators are active?
-active <- which(colSums(output$r1 * output$r3) > 50)
-colnames(M)[active]
+# Rank mediators and see summary information
+summary(bama.out, rank = T)
 ```
 
 # Reference

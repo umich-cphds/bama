@@ -43,6 +43,13 @@ This example is taken from the `bama` help file to help you get started using
 the method. Please check the documentation of the function by typing
 `?bama::bama`, and the vignette by typing `vingette("bama")` in R.
 
+`bama` includes an example dataset, `bama.data`. It is a `data.frame` with a
+numeric response `y`, numeric exposure `a` and 100 numeric mediators named
+`m1, m2, ..., m100`.
+
+We recommend using much larger numbers for `burnin` and `ndraws`, for
+example (30000, 1000).
+
 ```{r}
 library(bama)
 
@@ -58,7 +65,7 @@ beta.m  <- rep(0, 100)
 alpha.a <- rep(0, 100)
 
 set.seed(1245)
-bama.out <- bama(Y, A, M, C, C, beta.m, alpha.a, burnin = 3000, ndraws = 100)
+bama.out <- bama(Y, A, M, C, beta.m, alpha.a, burnin = 1000, ndraws = 100)
 
 # Rank mediators and see summary information
 head(summary(bama.out, rank = T))

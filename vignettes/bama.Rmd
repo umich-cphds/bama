@@ -14,13 +14,14 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
+# bama
 
 `bama` is a Bayesian inference method that uses continuous shrinkage priors for
 high-dimensional mediation analysis, developed by Song et al (2018).
 `bama` provides estimates for the regression coefficients as well as
 the posterior inclusion probability for ranking mediators.
 
-# Installation
+## Installation
 You can install `bama` from CRAN
 ```{r, eval = FALSE}
 install.packages("bama")
@@ -39,7 +40,7 @@ this can accomplished by installing
 [Rtools](https://cran.r-project.org/bin/windows/Rtools/), and
 [Xcode](https://apps.apple.com/us/app/xcode/id497799835?mt=12) on MacOS.
 
-# Example problem
+## Example problem
 `bama` contains a semi-synthetic example data set, `bama.data` that is used in
 this example. `bama.data` contains a continuous response `y` and a continuous
 exposure `a` that is mediated by 100 mediators, `m[1:100]`.
@@ -79,21 +80,21 @@ alpha.a <- rep(0, ncol(M))
 
 set.seed(12345)
 # It is recommended to pick a larger number for burnin.
-bama.out <- bama(Y, A, M, C, C, beta.m, alpha.a, burnin = 3000, ndraws = 100)
+bama.out <- bama(Y, A, M, C, beta.m, alpha.a, burnin = 3000, ndraws = 100)
 
-# Which mediators are active?
-summary(bama.out, rank = T)
+# rank the mediators by PIP and return the highest 10
+summary(bama.out, rank = T)[1:10,]
 ```
 
-Here, we calculate the posterior inclusion probability (PIP)
+Here, the summary function calculates the posterior inclusion probability (PIP)
 `r1 = r3 = 1 | Data`, and rank each mediator by its PIP. Each mediator's
-estimate and 95\% credible interval is included.
+estimate and 95\% credible interval is also calculated.
 
-# Reference
+## Reference
 Yanyi Song, Xiang Zhou et al. Bayesian Shrinkage Estimation of
 High Dimensional Causal Mediation Effects in Omics Studies.
 bioRxiv [10.1101/467399](https://doi.org/10.1101/467399)
 
-##Contact information
+## Contact
 If you would like to report a bug, ask questions, or suggest something, please
 e-mail Alexander Rix at `alexrix@umich.edu`.

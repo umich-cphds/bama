@@ -4,18 +4,16 @@
 \alias{bama}
 \title{High Dimensional Bayesian Mediation}
 \usage{
-bama(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws)
+bama(Y, A, M, C, beta.m, alpha.a, burnin, ndraws)
 }
 \arguments{
 \item{Y}{numeric outcome vector}
 
 \item{A}{numeric exposure vector}
 
-\item{M}{numeric matrix of mediators of Y and A.}
+\item{M}{numeric matrix of mediators of Y and A}
 
-\item{C1}{numeric matrix of extra covariates in the outcome model}
-
-\item{C2}{numeric matrix of extra covariates in the mediator model}
+\item{C}{numeric matrix of extra covariates to include}
 
 \item{beta.m}{numeric vector of initial beta.m in the outcome model}
 
@@ -26,8 +24,8 @@ bama(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws)
 \item{ndraws}{number of draws to take from MCMC after the burnin period}
 }
 \value{
-bama returns a list with 11 elements (each of length \code{ndraws}),
-sampled from the burned in MCMC:
+\code{bama} returns a object of type "bama" with 11 elements each of length
+\code{ndraws}), sampled from the burned in MCMC:
 \describe{
 \item{beta.m}{Outcome model mediator coefficients}
 \item{r1}{Whether or not each beta.m belongs to the larger normal
@@ -50,17 +48,17 @@ exposure-mediator coefficients (alpha.a)}
 }
 \description{
 \code{bama} is a Bayesian inference method that uses continuous shrinkage priors
-for high-dimensional mediation analysis, developed by Song et al (2018).
-\code{bama} provides estimates for the regression coefficients as well as
-the posterior inclusion probability for ranking mediators.
+for high-dimensional Bayesian mediation analysis, developed by Song et al
+(2018). \code{bama} provides estimates for the regression coefficients as
+well as the posterior inclusion probability for ranking mediators.
 }
 \details{
 \code{bama} uses two regression models for the two conditional relationships,
-\eqn{Y | A, M, C1} and \eqn{M | A, C2}. For the outcome model, \code{bama}
+\eqn{Y | A, M, C} and \eqn{M | A, C}. For the outcome model, \code{bama}
 uses
-\deqn{Y = M \beta_M  + A * \beta_A + C1* \beta_CY + \epsilon_Y}
+\deqn{Y = M \beta_M  + A * \beta_A + C* \beta_C + \epsilon_Y}
 For the mediator model, \code{bama} uses the model
-\deqn{M = A * \alpha_A + C2 * \alpha_C2 + \epsilon_M}
+\deqn{M = A * \alpha_A + C * \alpha_C + \epsilon_M}
 
 For high dimensional tractability, \code{bama} employs continuous Bayesian
 shrinkage priors to select mediators and makes the two following assumptions:
@@ -79,13 +77,13 @@ A <- bama.data$a
 # grab the mediators from the example data.frame
 M <- as.matrix(bama.data[, paste0("m", 1:100)], nrow(bama.data))
 
-# We just include the intercept term in this example.
+# We just include the intercept term in this example as we have no covariates
 C <- matrix(1, 1000, 1)
 beta.m  <- rep(0, 100)
 alpha.a <- rep(0, 100)
 
 set.seed(12345)
-out <- bama(Y, A, M, C, C, beta.m, alpha.a, burnin = 1000, ndraws = 100)
+out <- bama(Y, A, M, C, beta.m, alpha.a, burnin = 1000, ndraws = 100)
 
 # The package includes a function to summarise output from 'bama'
 summary <- summary(out)

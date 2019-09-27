@@ -163,7 +163,7 @@ bama <- function(Y, A, M, C1 = matrix(1, length(Y)), C2 = matrix(1, length(Y)),
     if (intercept && !any(apply(C1, 2, unique) == 1))
         C1 <- cbind(1, C1)
 
-    if (intercpt && !any(apply(C2, 2, unique) == 1))
+    if (intercept && !any(apply(C2, 2, unique) == 1))
         C2 <- cbind(1, C2)
 
     bama.out <- run_bama_mcmc(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws)

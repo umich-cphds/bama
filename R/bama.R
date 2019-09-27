@@ -23,11 +23,14 @@
 #' @param Y numeric outcome vector
 #' @param A numeric exposure vector
 #' @param M numeric matrix of mediators of Y and A
-#' @param C numeric matrix of extra covariates to include
+#' @param C1 numeric matrix of extra covariates to include in the outcome model
+#' @param C2 numeric matrix of extra covariates to include in the mediator model
 #' @param beta.m numeric vector of initial beta.m in the outcome model
 #' @param alpha.a numeric vector of initial alpha.a in the mediator model
 #' @param burnin number of iterations to run the MCMC before sampling
 #' @param ndraws number of draws to take from MCMC after the burnin period
+#' @param intercept Whether or not to add an intercept to C1 and C2 if one is
+#'   not there. Default is TRUE.
 #' @return
 #' \code{bama} returns a object of type "bama" with 11 elements each of length
 #' \code{ndraws}), sampled from the burned in MCMC:
@@ -60,12 +63,14 @@
 #' M <- as.matrix(bama.data[, paste0("m", 1:100)], nrow(bama.data))
 #'
 #' # We just include the intercept term in this example as we have no covariates
+#' # bama defaults C1 and C2 to be a matrix of 1s, so this is purely an
+#' # illustration.
 #' C <- matrix(1, 1000, 1)
 #' beta.m  <- rep(0, 100)
 #' alpha.a <- rep(0, 100)
 #'
 #' set.seed(12345)
-#' out <- bama(Y, A, M, C, beta.m, alpha.a, burnin = 1000, ndraws = 100)
+#' out <- bama(Y, A, M, C, C, beta.m, alpha.a, burnin = 1000, ndraws = 100)
 #'
 #' # The package includes a function to summarise output from 'bama'
 #' summary <- summary(out)
@@ -76,7 +81,8 @@
 #' bioRxiv \href{https://doi.org/10.1101/467399}{10.1101/467399}
 #' @author Alexander Rix
 #' @export
-bama <- function(Y, A, M, C, beta.m, alpha.a, burnin, ndraws)
+bama <- function(Y, A, M, C1 = matrix(1, length(Y)), C2 = matrix(1, length(Y)),
+                     beta.m, alpha.a, burnin, ndraws, intercept = TRUE)
 {
     if (!is.vector(Y) || !is.numeric(Y))
         stop("'Y' must be a numeric vector.")
@@ -106,15 +112,25 @@ bama <- function(Y, A, M, C, beta.m, alpha.a, burnin, ndraws)
     if (nrow(M) != length(Y))
         stop("The number of rows in 'M' does not match the length of 'Y'.")
 
-    if (!is.matrix(C) || !is.numeric(C))
-        stop("'C' must be a numeric matrix.")
-    else if (is.integer(C))
-        C <- matrix(as.double(C), nrow(C), ncol(C))
+    if (!is.matrix(C1) || !is.numeric(C1))
+        stop("'C1' must be a numeric matrix.")
+    else if (is.integer(C1))
+        C1 <- matrix(as.double(C1), nrow(C1), ncol(C1))
 
-    if (any(is.na(C)))
-        stop("'C' cannot have missing values.")
-    if (nrow(C) != length(Y))
-        stop("The number of rows in 'M' does not match the length of 'Y'.")
+    if (any(is.na(C1)))
+        stop("'C1' cannot have missing values.")
+    if (nrow(C1) != length(Y))
+        stop("The number of rows in 'C' does not match the length of 'Y'.")
+
+    if (!is.matrix(C2) || !is.numeric(C2))
+        stop("'C2' must be a numeric matrix.")
+    else if (is.integer(C2))
+        C2 <- matrix(as.double(C2), nrow(C2), ncol(C2))
+
+    if (any(is.na(C2)))
+        stop("'C2' cannot have missing values.")
+    if (nrow(C2) != length(Y))
+        stop("The number of rows in 'C' does not match the length of 'Y'.")
 
     if (!is.vector(beta.m) || !is.numeric(beta.m))
         stop("'beta.m' must be a numeric vector")
@@ -131,18 +147,6 @@ bama <- function(Y, A, M, C, beta.m, alpha.a, burnin, ndraws)
     if (any(is.na(alpha.a)))
         stop("'alpha.a' cannot contain missing values.")
 
-    pi.m <- mean(abs(beta.m)  > 1e-12)
-    pi.a <- mean(abs(alpha.a) > 1e-12)
-
-    if (pi.m == 1)
-        pi.m <- 0.9
-    if (pi.m == 0)
-        pi.m <- 0.1
-    if (pi.a == 1)
-        pi.a <- 0.9
-    if (pi.a == 0)
-        pi.a <- 0.1
-
     if (!is.numeric(burnin))
         stop("'burnin' should be a nonnegative integer.")
 
@@ -153,8 +157,16 @@ bama <- function(Y, A, M, C, beta.m, alpha.a, burnin, ndraws)
     if (!is.integer(ndraws))
         ndraws <- as.integer(ndraws)
 
-    bama.out <- run_bama_mcmc(Y, A, M, C, beta.m, alpha.a, pi.m, pi.a,
-                                  burnin, ndraws)
+    if (!is.logical(intercept))
+        stop("'intercept' must be TRUE or FALSE.")
+
+    if (intercept && !any(apply(C1, 2, unique) == 1))
+        C1 <- cbind(1, C1)
+
+    if (intercpt && !any(apply(C2, 2, unique) == 1))
+        C2 <- cbind(1, C2)
+
+    bama.out <- run_bama_mcmc(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws)
 
     colnames(bama.out$beta.m)  <- colnames(M)
     colnames(bama.out$alpha.a) <- colnames(M)

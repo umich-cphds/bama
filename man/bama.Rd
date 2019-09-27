@@ -4,7 +4,8 @@
 \alias{bama}
 \title{High Dimensional Bayesian Mediation}
 \usage{
-bama(Y, A, M, C, beta.m, alpha.a, burnin, ndraws)
+bama(Y, A, M, C1 = matrix(1, length(Y)), C2 = matrix(1, length(Y)),
+  beta.m, alpha.a, burnin, ndraws)
 }
 \arguments{
 \item{Y}{numeric outcome vector}
@@ -13,7 +14,9 @@ bama(Y, A, M, C, beta.m, alpha.a, burnin, ndraws)
 
 \item{M}{numeric matrix of mediators of Y and A}
 
-\item{C}{numeric matrix of extra covariates to include}
+\item{C1}{numeric matrix of extra covariates to include in the outcome model}
+
+\item{C2}{numeric matrix of extra covariates to include in the mediator model}
 
 \item{beta.m}{numeric vector of initial beta.m in the outcome model}
 
@@ -78,12 +81,14 @@ A <- bama.data$a
 M <- as.matrix(bama.data[, paste0("m", 1:100)], nrow(bama.data))
 
 # We just include the intercept term in this example as we have no covariates
+# bama defaults C1 and C2 to be a matrix of 1s, so this is purely an
+# illustration.
 C <- matrix(1, 1000, 1)
 beta.m  <- rep(0, 100)
 alpha.a <- rep(0, 100)
 
 set.seed(12345)
-out <- bama(Y, A, M, C, beta.m, alpha.a, burnin = 1000, ndraws = 100)
+out <- bama(Y, A, M, C, C, beta.m, alpha.a, burnin = 1000, ndraws = 100)
 
 # The package includes a function to summarise output from 'bama'
 summary <- summary(out)

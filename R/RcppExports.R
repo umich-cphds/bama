@@ -3,7 +3,7 @@
 
 #' @useDynLib bama
 #' @importFrom Rcpp evalCpp
-run_bama_mcmc <- function(Y, A, M, C, beta_m_init, alpha_a_init, pi_m_init, pi_a_init, burnin, ndraws) {
-    .Call('_bama_run_bama_mcmc', PACKAGE = 'bama', Y, A, M, C, beta_m_init, alpha_a_init, pi_m_init, pi_a_init, burnin, ndraws)
+run_bama_mcmc <- function(Y, A, M, C1, C2, beta_m_init, alpha_a_init, burnin, ndraws) {
+    .Call('_bama_run_bama_mcmc', PACKAGE = 'bama', Y, A, M, C1, C2, beta_m_init, alpha_a_init, burnin, ndraws)
 }
 

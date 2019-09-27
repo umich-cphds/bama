@@ -52,12 +52,13 @@ example (30000, 1000).
     M <- as.matrix(bama.data[, paste0("m", 1:100)], nrow(bama.data))
 
     # We just include the intercept term in this example.
-    C <- matrix(1, nrow(M), 1)
+    C1 <- matrix(1, nrow(M), 1)
+    C2 <- matrix(1, nrow(M), 1)
     beta.m  <- rep(0, 100)
     alpha.a <- rep(0, 100)
 
     set.seed(1245)
-    bama.out <- bama(Y, A, M, C, beta.m, alpha.a, burnin = 1000, ndraws = 100)
+    bama.out <- bama(Y, A, M, C1, C2, beta.m, alpha.a, burnin = 1000, ndraws = 100)
 
     # Rank mediators and see summary information
     head(summary(bama.out, rank = T))

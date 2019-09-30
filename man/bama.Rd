@@ -5,7 +5,8 @@
 \title{High Dimensional Bayesian Mediation}
 \usage{
 bama(Y, A, M, C1 = matrix(1, length(Y)), C2 = matrix(1, length(Y)),
-  beta.m, alpha.a, burnin, ndraws)
+  beta.m, alpha.a, burnin, ndraws, intercept = TRUE, k = 2,
+  lm0 = 1e-04, lm1 = 1, l = 1)
 }
 \arguments{
 \item{Y}{numeric outcome vector}
@@ -25,6 +26,19 @@ bama(Y, A, M, C1 = matrix(1, length(Y)), C2 = matrix(1, length(Y)),
 \item{burnin}{number of iterations to run the MCMC before sampling}
 
 \item{ndraws}{number of draws to take from MCMC after the burnin period}
+
+\item{intercept}{Whether or not to add an intercept to C1 and C2 if one is
+not there. Default is TRUE}
+
+\item{k}{Shape parameter prior for inverse gamma}
+
+\item{lm0}{Scale parameter prior for inverse gamma for the small normal
+components}
+
+\item{lm1}{Scale parameter prior for inverse gamma for the large normal
+components}
+
+\item{l}{Scale parameter prior for the other inverse gamma distributions}
 }
 \value{
 \code{bama} returns a object of type "bama" with 11 elements each of length

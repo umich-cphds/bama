@@ -8,12 +8,6 @@
 #include <R.h>
 #include <RcppArmadillo.h>
 
-// constants for generating random inverse gammas. Taken from paper
-#define K    2.0
-#define L_M0 1E-4
-#define L_M1 1.0
-#define L    1.0
-
 #define EPSILON 1e-12
 
 // returns 1 with probability p
@@ -71,16 +65,23 @@ struct bama_mcmc {
     double pi_m;
     double pi_a;
 
+
+    double k;
+    double lm0;
+    double lm1;
+    double l;
+
     bama_mcmc(arma::vec &Y, arma::vec &A, arma::mat &M, arma::mat &C1,
-                  arma::mat &C2, arma::vec &beta_m, arma::vec &alpha_a)
+                  arma::mat &C2, arma::vec &beta_m, arma::vec &alpha_a,
+                  double k, double lm0, double lm1, double l)
     {
-        sigma_m0  = rand_invgamma(K, L_M0);
-        sigma_m1  = rand_invgamma(K, L_M1);
-        sigma_ma0 = rand_invgamma(K, L_M0);
-        sigma_ma1 = rand_invgamma(K, L_M1);
-        sigma_a   = rand_invgamma(K, L);
-        sigma_e   = rand_invgamma(K, L);
-        sigma_g   = rand_invgamma(K, L);
+        sigma_m0  = rand_invgamma(k, lm0);
+        sigma_m1  = rand_invgamma(k, lm1);
+        sigma_ma0 = rand_invgamma(k, lm0);
+        sigma_ma1 = rand_invgamma(k, lm1);
+        sigma_a   = rand_invgamma(k, l);
+        sigma_e   = rand_invgamma(k, l);
+        sigma_g   = rand_invgamma(k, l);
 
         this->beta_m  = beta_m;
         this->alpha_a = alpha_a;
@@ -128,6 +129,11 @@ struct bama_mcmc {
         pi_m = std::min(0.9, std::max(0.1, pi_m));
         pi_a = mean(abs(alpha_a) > EPSILON);
         pi_a = std::min(0.9, std::max(0.1, pi_a));
+
+        this->k   = k;
+        this->lm0 = lm0;
+        this->lm0 = lm0;
+        this->l   = l;
     }
 
     void update_beta_m(arma::mat &M, arma::vec &var_m0, arma::vec &var_m1)
@@ -240,8 +246,8 @@ struct bama_mcmc {
         // square every element of rM, and sum
         double lg1 = arma::accu(rM % rM);
 
-        sigma_e = rand_invgamma(K + 0.5 * n, 0.5 * le1 + L);
-        sigma_g = rand_invgamma(K + 0.5 * n * q, 0.5 * lg1 + L);
+        sigma_e = rand_invgamma(k + 0.5 * n, 0.5 * le1 + l);
+        sigma_g = rand_invgamma(k + 0.5 * n * q, 0.5 * lg1 + l);
 
         update_beta_m(M, var_m0, var_m1);
         update_alpha_a(A);
@@ -263,11 +269,11 @@ struct bama_mcmc {
         double c7 = 0.5 * sum(1 - r3);
         double c8 = 0.5 * sum((1 - r3) % (alpha_a % alpha_a));
 
-        sigma_a   = rand_invgamma(0.5 + K, 0.5 * beta_a * beta_a + L);
-        sigma_m1  = rand_invgamma(c1 + K, c2 + L_M1);
-        sigma_ma1 = rand_invgamma(c3 + K, c4 + L_M1);
-        sigma_m0  = rand_invgamma(c5 + K, c6 + L_M0);
-        sigma_ma0 = rand_invgamma(c7 + K, c8 + L_M0);
+        sigma_a   = rand_invgamma(0.5 + k, 0.5 * beta_a * beta_a + l);
+        sigma_m1  = rand_invgamma(c1 + k, c2 + lm1);
+        sigma_ma1 = rand_invgamma(c3 + k, c4 + lm1);
+        sigma_m0  = rand_invgamma(c5 + k, c6 + lm0);
+        sigma_ma0 = rand_invgamma(c7 + k, c8 + lm0);
 
         // update fraction of active mediator priors (pi_m, pi_a)
         double m_pi_m = std::abs(pi_m * exp(R::runif(-.01, 0.01)));
@@ -305,9 +311,11 @@ struct bama_mcmc {
 // [[Rcpp::export]]
 Rcpp::List run_bama_mcmc(arma::vec &Y, arma::vec &A, arma::mat &M, arma::mat &C1,
                              arma::mat &C2, arma::vec &beta_m_init, arma::vec
-                             &alpha_a_init, int burnin, int ndraws)
+                             &alpha_a_init, int burnin, int ndraws, double k,
+                             double lm0, double lm1, double l)
 {
-    bama_mcmc mcmc = bama_mcmc(Y, A, M, C1, C2, beta_m_init, alpha_a_init);
+    bama_mcmc mcmc = bama_mcmc(Y, A, M, C1, C2, beta_m_init, alpha_a_init, k,
+                                   lm0, lm1, l);
 
     // Run mcmc for the number of specified burnin iterations.
     for (int i = 0; i < burnin; ++i)

@@ -30,7 +30,13 @@
 #' @param burnin number of iterations to run the MCMC before sampling
 #' @param ndraws number of draws to take from MCMC after the burnin period
 #' @param intercept Whether or not to add an intercept to C1 and C2 if one is
-#'   not there. Default is TRUE.
+#'   not there. Default is TRUE
+#' @param k Shape parameter prior for inverse gamma
+#' @param lm0 Scale parameter prior for inverse gamma for the small normal
+#'    components
+#' @param lm1 Scale parameter prior for inverse gamma for the large normal
+#'    components
+#' @param l Scale parameter prior for the other inverse gamma distributions
 #' @return
 #' \code{bama} returns a object of type "bama" with 11 elements each of length
 #' \code{ndraws}), sampled from the burned in MCMC:
@@ -82,7 +88,8 @@
 #' @author Alexander Rix
 #' @export
 bama <- function(Y, A, M, C1 = matrix(1, length(Y)), C2 = matrix(1, length(Y)),
-                     beta.m, alpha.a, burnin, ndraws, intercept = TRUE)
+                     beta.m, alpha.a, burnin, ndraws, intercept = TRUE, k = 2.0,
+                     lm0 = 1e-4, lm1 = 1.0, l = 1.0)
 {
     if (!is.vector(Y) || !is.numeric(Y))
         stop("'Y' must be a numeric vector.")
@@ -163,10 +170,11 @@ bama <- function(Y, A, M, C1 = matrix(1, length(Y)), C2 = matrix(1, length(Y)),
     if (intercept && !any(apply(C1, 2, unique) == 1))
         C1 <- cbind(1, C1)
 
-    if (intercpt && !any(apply(C2, 2, unique) == 1))
+    if (intercept && !any(apply(C2, 2, unique) == 1))
         C2 <- cbind(1, C2)
 
-    bama.out <- run_bama_mcmc(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws)
+    bama.out <- run_bama_mcmc(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws,
+                                  k, lm0, lm1, l)
 
     colnames(bama.out$beta.m)  <- colnames(M)
     colnames(bama.out$alpha.a) <- colnames(M)

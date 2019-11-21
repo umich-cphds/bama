@@ -8,12 +8,24 @@ knitr::opts_chunk$set(
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
-  version <- as.vector(read.dcf('DESCRIPTION')[, 'Version'])                                                                  
-  version <- gsub('-', '.', version)
+  version.github <- as.vector(read.dcf('DESCRIPTION')[, 'Version'])                                                                  
+  version.github <- gsub('-', '.', version.github)
+
+  # get the version from the CRAN package mirror
+  cran.dcf.con <- url("https://raw.githubusercontent.com/cran/bama/master/DESCRIPTION")
+  version.cran <- read.dcf(file = cran.dcf.con)[, "Version"]
+  close(cran.dcf.con)
+  if (version.cran == version.github) {
+      color <- "success"
+  } else {
+      color <- "informational"
+  }
+
+
 ```
 <!-- badges: start -->
 [![CRAN Version](https://www.r-pkg.org/badges/version/bama)](https://cran.r-project.org/package=bama)
-[![Github Version](https://img.shields.io/badge/Github-`r version`-informational.svg?style=flat)](commits/master)
+[![Github Version](https://img.shields.io/badge/Github-`r version.github`-informational.svg?style=flat)](commits/master)
 [![Travis CI](https://travis-ci.org/umich-cphds/bama.svg?branch=master)](https://travis-ci.org/umich-cphds/bama)
 <!-- badges: end -->
 

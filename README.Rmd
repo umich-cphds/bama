@@ -11,10 +11,13 @@ knitr::opts_chunk$set(
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
+  version <- as.vector(read.dcf('DESCRIPTION')[, 'Version'])                                                                  
+  version <- gsub('-', '.', version)
 ```
 <!-- badges: start -->
 [![CRAN status](https://www.r-pkg.org/badges/version/bama)](https://cran.r-project.org/package=bama)
-[![CRAN Logs Downloads](https://cranlogs.r-pkg.org/badges/bama)]
+[![packageversion](https://img.shields.io/badge/Package%20version-`r version`-orange.svg?style=flat-square)](commits/master)
+[![TRAVIS CI](https://travis-ci.org/umich-cphds/bama.svg?branch=master)](https://travis-ci.org/umich-cphds/bama)
 <!-- badges: end -->
 
 # Bayesian Mediation Analysis

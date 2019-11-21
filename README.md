@@ -1,10 +1,8 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 <!-- badges: start -->
-[![CRAN
-status](https://www.r-pkg.org/badges/version/bama)](https://cran.r-project.org/package=bama)
+[![CRAN status](https://www.r-pkg.org/badges/version/bama)](https://cran.r-project.org/package=bama)
 [![packageversion](https://img.shields.io/badge/Package%20version-0.9.2-orange.svg?style=flat-square)](commits/master)
-[![TRAVIS
-CI](https://travis-ci.org/umich-cphds/bama.svg?branch=master)](https://travis-ci.org/umich-cphds/bama)
+[![TRAVIS CI](https://travis-ci.org/umich-cphds/bama.svg?branch=master)](https://travis-ci.org/umich-cphds/bama)
 <!-- badges: end -->
 
 Bayesian Mediation Analysis

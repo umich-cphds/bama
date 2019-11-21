@@ -25,7 +25,7 @@ knitr::opts_chunk$set(
 ```
 <!-- badges: start -->
 [![CRAN Version](https://www.r-pkg.org/badges/version/bama)](https://cran.r-project.org/package=bama)
-[![Github Version](https://img.shields.io/badge/Github-`r version.github`-informational.svg?style=flat)](commits/master)
+[![Github Version](https://img.shields.io/badge/Github-`r version.github`-`r color`.svg?style=flat)](commits/master)
 [![Travis CI](https://travis-ci.org/umich-cphds/bama.svg?branch=master)](https://travis-ci.org/umich-cphds/bama)
 <!-- badges: end -->
 

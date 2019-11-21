@@ -13,7 +13,8 @@ knitr::opts_chunk$set(
 )
 ```
 <!-- badges: start -->
-[![Travis build status](https://travis-ci.org/umich-cphds/bama.svg?branch=master)](https://travis-ci.org/umich-cphds/bama)
+[![CRAN status](https://www.r-pkg.org/badges/version/bama)](https://cran.r-project.org/package=bama)
+[![CRAN Logs Downloads](https://cranlogs.r-pkg.org/badges/bama)]
 <!-- badges: end -->
 
 # Bayesian Mediation Analysis
@@ -73,6 +74,7 @@ head(summary(bama.out, rank = T))
 ```
 
 # Reference
-Yanyi Song, Xiang Zhou et al. Bayesian Shrinkage Estimation of High
-Dimensional Causal Mediation Effects in Omics Studies.
-[bioRxiv 467399](https://doi.org/10.1101/467399)
+Song, Y. , Zhou, X. , Zhang, M. , Zhao, W. , Liu, Y. , Kardia, S. L., Roux, A. V.,
+Needham, B. L., Smith, J. A. and Mukherjee, B. (2019), Bayesian shrinkage
+estimation of high dimensional causal mediation effects in omics studies.
+Biometrics. Accepted Author Manuscript. [10.1111/biom.13189](https://doi.org/10.1111/biom.13189)

@@ -1,7 +1,8 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 <!-- badges: start -->
-[![Travis build
-status](https://travis-ci.org/umich-cphds/bama.svg?branch=master)](https://travis-ci.org/umich-cphds/bama)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/bama)](https://cran.r-project.org/package=bama)
+\[![CRAN Logs Downloads](https://cranlogs.r-pkg.org/badges/bama)\]
 <!-- badges: end -->
 
 Bayesian Mediation Analysis
@@ -62,17 +63,19 @@ example (30000, 1000).
 
     # Rank mediators and see summary information
     head(summary(bama.out, rank = T))
-    #>         estimate      ci.lower    ci.upper  pip
-    #> m12  0.199260031  0.1182283493  0.26774482 1.00
-    #> m65 -0.264636309 -0.3447152559 -0.19585711 1.00
-    #> m89 -0.142337957 -0.2222596056 -0.05402508 0.77
-    #> m86  0.015774996 -0.0235833368  0.05717425 0.04
-    #> m93  0.032886535 -0.0009256334  0.07676403 0.04
-    #> m48 -0.005354759 -0.0454059793  0.03261661 0.03
+    #>        estimate    ci.lower     ci.upper  pip
+    #> m12  0.18576755  0.12218219  0.253780289 0.99
+    #> m65 -0.23979113 -0.30642142 -0.165385815 0.99
+    #> m89 -0.14252621 -0.21202100 -0.065313879 0.91
+    #> m97 -0.04289325 -0.10325313  0.007526357 0.31
+    #> m90 -0.03041407 -0.08301040  0.012826983 0.17
+    #> m93  0.04051381 -0.00547444  0.118579967 0.17
 
 Reference
 =========
 
-Yanyi Song, Xiang Zhou et al. Bayesian Shrinkage Estimation of High
-Dimensional Causal Mediation Effects in Omics Studies. [bioRxiv
-467399](https://doi.org/10.1101/467399)
+Song, Y. , Zhou, X. , Zhang, M. , Zhao, W. , Liu, Y. , Kardia, S. L.,
+Roux, A. V., Needham, B. L., Smith, J. A. and Mukherjee, B. (2019),
+Bayesian shrinkage estimation of high dimensional causal mediation
+effects in omics studies. Biometrics. Accepted Author Manuscript.
+[10.1111/biom.13189](https://doi.org/10.1111/biom.13189)

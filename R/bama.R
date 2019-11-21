@@ -82,9 +82,10 @@
 #' summary <- summary(out)
 #' head(summary)
 #' @references
-#' Yanyi Song, Xiang Zhou et al. Bayesian Shrinkage Estimation of High
-#' Dimensional Causal Mediation Effects in Omics Studies.
-#' bioRxiv \href{https://doi.org/10.1101/467399}{10.1101/467399}
+#' Song, Y. , Zhou, X. , Zhang, M. , Zhao, W. , Liu, Y. , Kardia, S. L., Roux, A. V.,
+#' Needham, B. L., Smith, J. A. and Mukherjee, B. (2019), Bayesian shrinkage
+#' estimation of high dimensional causal mediation effects in omics studies.
+#' Biometrics. Accepted Author Manuscript. [10.1111/biom.13189](https://doi.org/10.1111/biom.13189)
 #' @author Alexander Rix
 #' @export
 bama <- function(Y, A, M, C1 = matrix(1, length(Y)), C2 = matrix(1, length(Y)),

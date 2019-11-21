@@ -2,7 +2,6 @@
 <!-- badges: start -->
 [![CRAN
 status](https://www.r-pkg.org/badges/version/bama)](https://cran.r-project.org/package=bama)
-\[![CRAN Logs Downloads](https://cranlogs.r-pkg.org/badges/bama)\]
 <!-- badges: end -->
 
 Bayesian Mediation Analysis

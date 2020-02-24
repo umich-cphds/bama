@@ -1,9 +1,9 @@
 ---
-title: "High Dimensional Bayesian Mediation Analysis in R"
+title: "Bayesian Mediation Analysis in R"
 author: "Alexander Rix"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{High Dimensional Bayesian Mediation Analysis in R}
+  %\VignetteIndexEntry{Bayesian Mediation Analysis in R}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -14,12 +14,22 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
-# bama
 
-`bama` is a Bayesian inference method that uses continuous shrinkage priors for
-high-dimensional mediation analysis, developed by Song et al (2018).
-`bama` provides estimates for the regression coefficients as well as
-the posterior inclusion probability for ranking mediators.
+Perform mediation analysis in the presence of high-dimensional
+mediators based on the potential outcome framework. Bayesian Mediation
+Analysis (BAMA), developed by Song et al (2019) <doi:10.1111/biom.13189>,
+relies on two Bayesian sparse linear mixed models to simultaneously analyze
+a relatively large number of mediators for a continuous exposure and outcome
+assuming a small number of mediators are truly active. This sparsity
+assumption also allows the extension of univariate mediator analysis by
+casting the identification of active mediators as a variable selection
+problem and applying Bayesian methods with continuous shrinkage priors on
+the effects.
+
+
+The Github version may contain new features or bug fixes not yet present on
+CRAN, so if you are experiencing issues, you may want to try the Github
+version of the package.
 
 ## Installation
 You can install `bama` from CRAN
@@ -28,7 +38,7 @@ install.packages("bama")
 
 ```
 
-or from github via `devtools`
+or from Github via `devtools`
 ```{r, eval = FALSE}
 # install.packages(devtools)
 devtools::install_github("umich-cphds/bama", built_opts = c())
@@ -92,10 +102,9 @@ Here, the summary function calculates the posterior inclusion probability (PIP)
 estimate and 95\% credible interval is also calculated.
 
 ## Reference
-Song, Y. , Zhou, X. , Zhang, M. , Zhao, W. , Liu, Y. , Kardia, S. L., Roux, A. V.,
-Needham, B. L., Smith, J. A. and Mukherjee, B. (2019), Bayesian shrinkage
-estimation of high dimensional causal mediation effects in omics studies.
-Biometrics. Accepted Author Manuscript. [10.1111/biom.13189](https://doi.org/10.1111/biom.13189)
+Song, Y, Zhou, X, Zhang, M, et al. Bayesian shrinkage estimation of high
+dimensional causal mediation effects in omics studies. Biometrics. 2019;
+1-11. [https://doi.org/10.1111/biom.13189]{https://doi.org/10.1111/biom.13189}
 
 ## Contact
 If you would like to report a bug, ask questions, or suggest something, please

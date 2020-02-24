@@ -3,5 +3,6 @@
 S3method(print,bama)
 S3method(summary,bama)
 export(bama)
+export(fdr.bama)
 importFrom(Rcpp,evalCpp)
 useDynLib(bama)

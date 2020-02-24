@@ -1,8 +1,8 @@
-#' High Dimensional Bayesian Mediation
+#' Bayesian Mediation Analysis
 #'
 #' `bama` is a Bayesian inference method that uses continuous shrinkage priors
 #' for high-dimensional Bayesian mediation analysis, developed by Song et al
-#' (2018). \code{bama} provides estimates for the regression coefficients as
+#' (2019). \code{bama} provides estimates for the regression coefficients as
 #' well as the posterior inclusion probability for ranking mediators.
 #'
 #' \code{bama} uses two regression models for the two conditional relationships,
@@ -29,8 +29,6 @@
 #' @param alpha.a numeric vector of initial alpha.a in the mediator model
 #' @param burnin number of iterations to run the MCMC before sampling
 #' @param ndraws number of draws to take from MCMC after the burnin period
-#' @param intercept Whether or not to add an intercept to C1 and C2 if one is
-#'   not there. Default is TRUE
 #' @param k Shape parameter prior for inverse gamma
 #' @param lm0 Scale parameter prior for inverse gamma for the small normal
 #'    components
@@ -71,111 +69,92 @@
 #' # We just include the intercept term in this example as we have no covariates
 #' # bama defaults C1 and C2 to be a matrix of 1s, so this is purely an
 #' # illustration.
-#' C <- matrix(1, 1000, 1)
 #' beta.m  <- rep(0, 100)
 #' alpha.a <- rep(0, 100)
 #'
 #' set.seed(12345)
-#' out <- bama(Y, A, M, C, C, beta.m, alpha.a, burnin = 1000, ndraws = 100)
+#' out <- bama(Y, A, M, beta.m, alpha.a, burnin = 1000, ndraws = 100)
 #'
 #' # The package includes a function to summarise output from 'bama'
 #' summary <- summary(out)
 #' head(summary)
 #' @references
-#' Song, Y. , Zhou, X. , Zhang, M. , Zhao, W. , Liu, Y. , Kardia, S. L., Roux, A. V.,
-#' Needham, B. L., Smith, J. A. and Mukherjee, B. (2019), Bayesian shrinkage
-#' estimation of high dimensional causal mediation effects in omics studies.
-#' Biometrics. Accepted Author Manuscript. [10.1111/biom.13189](https://doi.org/10.1111/biom.13189)
+#' Song, Y, Zhou, X, Zhang, M, et al. Bayesian shrinkage estimation of high
+#' dimensional causal mediation effects in omics studies. Biometrics. 2019;
+#' 1-11. [https://doi.org/10.1111/biom.13189]{https://doi.org/10.1111/biom.13189}
 #' @author Alexander Rix
 #' @export
-bama <- function(Y, A, M, C1 = matrix(1, length(Y)), C2 = matrix(1, length(Y)),
-                     beta.m, alpha.a, burnin, ndraws, intercept = TRUE, k = 2.0,
-                     lm0 = 1e-4, lm1 = 1.0, l = 1.0)
+bama <- function(Y, A, M, beta.m, alpha.a, burnin, ndraws,
+                 C1 = matrix(1, length(Y)), C2 = matrix(1, length(Y)),
+                 k = 2.0, lm0 = 1e-4, lm1 = 1.0, l = 1.0)
 {
     if (!is.vector(Y) || !is.numeric(Y))
         stop("'Y' must be a numeric vector.")
-    else if (is.integer(Y))
-        Y <- as.double(Y)
-
     if (any(is.na(Y)))
         stop("'Y' must not have missing values.")
 
+    n <- length(Y)
+
     if (!is.vector(A) || !is.numeric(A))
         stop("'A' should be a numeric vector.")
-    else if (is.integer(A))
-        A <- as.double(A)
-
     if (any(is.na(A)))
         stop("'A' cannot have missing values.")
-    if (length(A) != length(Y))
+    if (length(A) != n)
         stop("Lengths of 'A' and 'Y' do not match.")
+
 
     if (!is.matrix(M) || !is.numeric(M))
         stop("'M' must be a numeric matrix.")
-    else if (is.integer(M))
-        M <- matrix(as.double(M), nrow(M), ncol(M))
-
     if (any(is.na(M)))
         stop("'M' cannot have missing values.")
     if (nrow(M) != length(Y))
         stop("The number of rows in 'M' does not match the length of 'Y'.")
 
+
     if (!is.matrix(C1) || !is.numeric(C1))
         stop("'C1' must be a numeric matrix.")
-    else if (is.integer(C1))
-        C1 <- matrix(as.double(C1), nrow(C1), ncol(C1))
-
     if (any(is.na(C1)))
         stop("'C1' cannot have missing values.")
     if (nrow(C1) != length(Y))
-        stop("The number of rows in 'C' does not match the length of 'Y'.")
-
+        stop("The number of rows in 'C1' does not match the length of 'Y'.")
     if (!is.matrix(C2) || !is.numeric(C2))
         stop("'C2' must be a numeric matrix.")
-    else if (is.integer(C2))
-        C2 <- matrix(as.double(C2), nrow(C2), ncol(C2))
 
     if (any(is.na(C2)))
         stop("'C2' cannot have missing values.")
     if (nrow(C2) != length(Y))
-        stop("The number of rows in 'C' does not match the length of 'Y'.")
+        stop("The number of rows in 'C2' does not match the length of 'Y'.")
 
     if (!is.vector(beta.m) || !is.numeric(beta.m))
         stop("'beta.m' must be a numeric vector")
-    if (is.integer(beta.m))
-        beta.m <- as.double(beta.m)
     if (any(is.na(beta.m)))
         stop("'beta.m' cannot contain missing values.")
 
     if (!is.vector(alpha.a) || !is.numeric(alpha.a))
         stop("'alpha.a' must be a numeric vector")
-
-    if (is.integer(alpha.a))
-        alpha.a <- as.double(alpha.a)
     if (any(is.na(alpha.a)))
         stop("'alpha.a' cannot contain missing values.")
 
-    if (!is.numeric(burnin))
+    if (!is.numeric(burnin) || !is.vector(burnin) || length(burnin) != 1)
         stop("'burnin' should be a nonnegative integer.")
 
-    if (!is.integer(burnin))
-        burnin <- as.integer(burnin)
-    if (!is.numeric(ndraws))
+    if (!is.numeric(ndraws) || !is.vector(ndraws) || length(ndraws) != 1)
         stop("'ndraws' should be a nonnegative integer.")
-    if (!is.integer(ndraws))
-        ndraws <- as.integer(ndraws)
 
-    if (!is.logical(intercept))
-        stop("'intercept' must be TRUE or FALSE.")
+    if (!is.numeric(k) || !is.vector(k) || length(k) != 1 || k < 0)
+        stop("'k' should be a nonnegative number.")
 
-    if (intercept && !any(apply(C1, 2, unique) == 1))
-        C1 <- cbind(1, C1)
+    if (!is.numeric(lm0) || !is.vector(lm0) || length(lm0) != 1 || lm0 < 0)
+        stop("'lm0' should be a nonnegative number.")
 
-    if (intercept && !any(apply(C2, 2, unique) == 1))
-        C2 <- cbind(1, C2)
+    if (!is.numeric(lm1) || !is.vector(lm1) || length(lm1) != 1 || lm1 < 0)
+        stop("'lm1' should be a nonnegative number.")
+
+    if (!is.numeric(l) || !is.vector(l) || length(l) != 1 || l < 0)
+        stop("'l' should be a nonnegative number.")
 
     bama.out <- run_bama_mcmc(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws,
-                                  k, lm0, lm1, l)
+                              k, lm0, lm1, l)
 
     colnames(bama.out$beta.m)  <- colnames(M)
     colnames(bama.out$alpha.a) <- colnames(M)

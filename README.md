@@ -55,6 +55,7 @@ We recommend using much larger numbers for `burnin` and `ndraws`, for
 example (30000, 1000).
 
     library(bama)
+    #> Loading required package: parallel
 
     Y <- bama.data$y
     A <- bama.data$a
@@ -87,5 +88,4 @@ Reference
 
 Song, Y, Zhou, X, Zhang, M, et al. Bayesian shrinkage estimation of high
 dimensional causal mediation effects in omics studies. Biometrics. 2019;
-1-11.
-\[<https://doi.org/10.1111/biom.13189>\]{<https://doi.org/10.1111/biom.13189>}
+1-11. <https://doi.org/10.1111/biom.13189>

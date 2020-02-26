@@ -20,13 +20,17 @@
 #' ("active" mediators). \code{bama} uses a Metropolis-Hastings within Gibbs
 #' MCMC to generate posterior samples from the model.
 #'
-#' @param Y numeric outcome vector
-#' @param A numeric exposure vector
-#' @param M numeric matrix of mediators of Y and A
-#' @param C1 numeric matrix of extra covariates to include in the outcome model
-#' @param C2 numeric matrix of extra covariates to include in the mediator model
-#' @param beta.m numeric vector of initial beta.m in the outcome model
-#' @param alpha.a numeric vector of initial alpha.a in the mediator model
+#' @param Y Length \code{n} numeric outcome vector
+#' @param A Length \code{n} numeric exposure vector
+#' @param M \code{n x p} numeric matrix of mediators of Y and A
+#' @param C1 \code{n x nc1} numeric matrix of extra covariates to include in the
+#'     outcome model
+#' @param C2 \code{n x nc2} numeric matrix of extra covariates to include in the
+#'     mediator model
+#' @param beta.m Length \code{p} numeric vector of initial \code{beta.m} in the
+#'     outcome model
+#' @param alpha.a Length \code{p} numeric vector of initial \code{alpha.a} in
+#'     the mediator model
 #' @param burnin number of iterations to run the MCMC before sampling
 #' @param ndraws number of draws to take from MCMC after the burnin period
 #' @param k Shape parameter prior for inverse gamma
@@ -36,26 +40,44 @@
 #'    components
 #' @param l Scale parameter prior for the other inverse gamma distributions
 #' @return
-#' \code{bama} returns a object of type "bama" with 11 elements each of length
-#' \code{ndraws}), sampled from the burned in MCMC:
+#' \code{bama} returns a object of type "bama" with 11 elements:
 #' \describe{
-#'   \item{beta.m}{Outcome model mediator coefficients}
-#'   \item{r1}{Whether or not each beta.m belongs to the larger normal
-#'     component (1) or smaller normal component (0)}
-#'   \item{alpha.a}{Mediator model exposure coefficients}
-#'   \item{r3}{Whether or not each alpha.a belongs to the larger normal
-#'     component (1) or smaller normal component (0)}
-#'   \item{beta.a}{beta.a coefficient}
-#'   \item{pi.m}{Proportion of non zero beta.m coefficients}
-#'   \item{pi.a}{Proportion of non zero alpha.a coefficients}
-#'   \item{sigma.m0}{standard deviation of the smaller normal component for
-#'     mediator-outcome coefficients (beta.m)}
-#'   \item{sigma.m1}{standard deviation of the larger normal component for
-#'     mediator-outcome coefficients (beta.m)}
-#'   \item{sigma.ma0}{Standard deviation of the smaller normal component for
-#'     exposure-mediator coefficients (alpha.a)}
-#'   \item{sigma.ma1}{Standard deviation of the larger normal component for
-#'     exposure-mediator coefficients (alpha.a)}
+#' \item{beta.m}{\code{ndraws x p} matrix containing outcome model mediator
+#'       coefficients.
+#' }
+#' \item{r1}{\code{ndraws x p} matrix indicating whether or not each beta.m
+#'     belongs to the larger normal component (1) or smaller normal
+#'     component (0).
+#' }
+#' \item{alpha.a}{\code{ndraws x p} matrix containing the mediator model
+#'     exposure coefficients.
+#' }
+#' \item{r3}{\code{ndraws x p} matrix indicating whether or not each alpha.a
+#'     belongs to the larger normal component (1) or smaller normal component (0).
+#' }
+#' \item{beta.a}{Vector of length \code{ndraws} containing the beta.a coefficient.}
+#' \item{pi.m}{Vector of length \code{ndraws} containing the proportion of
+#'     non zero beta.m coefficients.
+#' }
+#' \item{pi.a}{Vector of length \code{ndraws} containing the proportion of
+#'     non zero alpha.a coefficients.
+#' }
+#'   \item{sigma.m0}{Vector of length \code{ndraws} containing the standard
+#'       deviation of the smaller normal component for mediator-outcome
+#'       coefficients (beta.m).
+#' }
+#' \item{sigma.m1}{Vector of length \code{ndraws} containing standard deviation
+#'     of the larger normal component for mediator-outcome coefficients (beta.m).
+#' }
+#' \item{sigma.ma0}{Vector of length \code{ndraws} containing standard
+#'     deviation of the smaller normal component for exposure-mediator
+#'     coefficients (alpha.a).
+#' }
+#' \item{sigma.ma1}{Vector of length \code{ndraws} containing standard deviation
+#'     of the larger normal component for exposure-mediator coefficients
+#'     (alpha.a).
+#' }
+#' \item{call}{The R call that generated the output.}
 #' }
 #' @examples
 #' library(bama)
@@ -67,13 +89,13 @@
 #' M <- as.matrix(bama.data[, paste0("m", 1:100)], nrow(bama.data))
 #'
 #' # We just include the intercept term in this example as we have no covariates
-#' # bama defaults C1 and C2 to be a matrix of 1s, so this is purely an
-#' # illustration.
+#' C1 <- matrix(1, 1000, 1)
+#' C2 <- matrix(1, 1000, 1)
 #' beta.m  <- rep(0, 100)
 #' alpha.a <- rep(0, 100)
 #'
 #' set.seed(12345)
-#' out <- bama(Y, A, M, beta.m, alpha.a, burnin = 1000, ndraws = 100)
+#' out <- bama(Y, A, M, C1, C2, beta.m, alpha.a, burnin = 1000, ndraws = 100)
 #'
 #' # The package includes a function to summarise output from 'bama'
 #' summary <- summary(out)
@@ -81,13 +103,14 @@
 #' @references
 #' Song, Y, Zhou, X, Zhang, M, et al. Bayesian shrinkage estimation of high
 #' dimensional causal mediation effects in omics studies. Biometrics. 2019;
-#' 1-11. [https://doi.org/10.1111/biom.13189]{https://doi.org/10.1111/biom.13189}
+#' 1-11. \href{http://doi.org/10.1111/biom.13189}{doi:10.1111/biom.13189}
 #' @author Alexander Rix
 #' @export
-bama <- function(Y, A, M, beta.m, alpha.a, burnin, ndraws,
-                 C1 = matrix(1, length(Y)), C2 = matrix(1, length(Y)),
-                 k = 2.0, lm0 = 1e-4, lm1 = 1.0, l = 1.0)
+bama <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws, k = 2.0,
+                 lm0 = 1e-4, lm1 = 1.0, l = 1.0)
 {
+    call <- match.call()
+
     if (!is.vector(Y) || !is.numeric(Y))
         stop("'Y' must be a numeric vector.")
     if (any(is.na(Y)))
@@ -102,14 +125,12 @@ bama <- function(Y, A, M, beta.m, alpha.a, burnin, ndraws,
     if (length(A) != n)
         stop("Lengths of 'A' and 'Y' do not match.")
 
-
     if (!is.matrix(M) || !is.numeric(M))
         stop("'M' must be a numeric matrix.")
     if (any(is.na(M)))
         stop("'M' cannot have missing values.")
     if (nrow(M) != length(Y))
         stop("The number of rows in 'M' does not match the length of 'Y'.")
-
 
     if (!is.matrix(C1) || !is.numeric(C1))
         stop("'C1' must be a numeric matrix.")
@@ -160,6 +181,8 @@ bama <- function(Y, A, M, beta.m, alpha.a, burnin, ndraws,
     colnames(bama.out$alpha.a) <- colnames(M)
     colnames(bama.out$r1)      <- colnames(M)
     colnames(bama.out$r3)      <- colnames(M)
+
+    bama.out$call <- call
 
     structure(bama.out, class = "bama")
 }

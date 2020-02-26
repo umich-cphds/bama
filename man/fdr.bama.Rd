@@ -2,103 +2,96 @@
 % Please edit documentation in R/fdr.bama.R
 \name{fdr.bama}
 \alias{fdr.bama}
-\title{High Dimensional Bayesian Mediation}
+\title{Bayesian Mediation Analysis Controlling For False Discovery}
 \usage{
 fdr.bama(
   Y,
   A,
   M,
+  C1,
+  C2,
   beta.m,
   alpha.a,
   burnin,
   ndraws,
-  C1 = matrix(1, length(Y)),
-  C2 = matrix(1, length(Y)),
   npermutations = 200,
-  fdr = 0.05,
+  fdr = 0.1,
   k = 2,
   lm0 = 1e-04,
   lm1 = 1,
   l = 1,
-  mc.cores = 1
+  mc.cores = 1,
+  type = "PSOCK"
 )
 }
 \arguments{
-\item{Y}{numeric outcome vector}
+\item{Y}{Length \code{n} numeric outcome vector}
 
-\item{A}{numeric exposure vector}
+\item{A}{Length \code{n} numeric exposure vector}
 
-\item{M}{numeric matrix of mediators of Y and A}
+\item{M}{\code{n x p} numeric matrix of mediators of Y and A}
 
-\item{beta.m}{numeric vector of initial beta.m in the outcome model}
+\item{C1}{\code{n x nc1} numeric matrix of extra covariates to include in the
+outcome model}
 
-\item{alpha.a}{numeric vector of initial alpha.a in the mediator model}
+\item{C2}{\code{n x nc2} numeric matrix of extra covariates to include in the
+mediator model}
 
-\item{burnin}{number of iterations to run the MCMC before sampling}
+\item{beta.m}{Length \code{p} numeric vector of initial \code{beta.m} in the
+outcome model}
 
-\item{ndraws}{number of draws to take from MCMC after the burnin period}
+\item{alpha.a}{Length \code{p} numeric vector of initial \code{alpha.a} in
+the mediator model}
 
-\item{C1}{numeric matrix of extra covariates to include in the outcome model}
+\item{burnin}{Number of iterations to run the MCMC before sampling}
 
-\item{C2}{numeric matrix of extra covariates to include in the mediator model}
+\item{ndraws}{Number of draws to take from MCMC after the burnin period}
 
-\item{k}{Shape parameter prior for inverse gamma}
+\item{npermutations}{The number of permutations to generate while estimating
+the null pip distribution. Default is 200}
+
+\item{fdr}{False discovery rate. Default is 0.1}
+
+\item{k}{Shape parameter prior for inverse gamma. Default is 2.0}
 
 \item{lm0}{Scale parameter prior for inverse gamma for the small normal
-components}
+components. Default is 1e-4}
 
 \item{lm1}{Scale parameter prior for inverse gamma for the large normal
-components}
+components. Default is 1.0}
 
-\item{l}{Scale parameter prior for the other inverse gamma distributions}
+\item{l}{Scale parameter prior for the other inverse gamma distributions.
+Default is 1.0}
 
-\item{intercept}{Whether or not to add an intercept to C1 and C2 if one is
-not there. Default is TRUE}
+\item{mc.cores}{The number of cores to use while running \code{fdr.bama}.
+\code{fdr.bama} uses the \code{parallel} package for parallelization,
+so see that for more information. Default is 1 core}
+
+\item{type}{Type of cluster to make when \code{mc.cores > 1}. See
+\code{makeCluster} in the \code{parallel} package for more details.
+Default is "PSOCK"}
 }
 \value{
-\code{bama} returns a object of type "bama" with 11 elements each of length
-\code{ndraws}), sampled from the burned in MCMC:
+\code{fdr.bama} returns a object of type "fdr.bama" with 6 elements:
 \describe{
-\item{beta.m}{Outcome model mediator coefficients}
-\item{r1}{Whether or not each beta.m belongs to the larger normal
-component (1) or smaller normal component (0)}
-\item{alpha.a}{Mediator model exposure coefficients}
-\item{r3}{Whether or not each alpha.a belongs to the larger normal
-component (1) or smaller normal component (0)}
-\item{beta.a}{beta.a coefficient}
-\item{pi.m}{Proportion of non zero beta.m coefficients}
-\item{pi.a}{Proportion of non zero alpha.a coefficients}
-\item{sigma.m0}{standard deviation of the smaller normal component for
-mediator-outcome coefficients (beta.m)}
-\item{sigma.m1}{standard deviation of the larger normal component for
-mediator-outcome coefficients (beta.m)}
-\item{sigma.ma0}{Standard deviation of the smaller normal component for
-exposure-mediator coefficients (alpha.a)}
-\item{sigma.ma1}{Standard deviation of the larger normal component for
-exposure-mediator coefficients (alpha.a)}
+\item{bama.out}{Output from the \code{bama} run.}
+\item{pip.null}{A \code{p x npermutations} matrices containing the
+estimated null PIP distribution for each mediator.
+}
+\item{threshold}{The cutoff significance threshold for each PIP controlling
+for the false discovery rate.
+}
+\item{fdr}{The false discovery rate used to calculate \code{threshold}.}
+\item{call}{The R call that generated the output.}
 }
 }
 \description{
-\code{bama} is a Bayesian inference method that uses continuous shrinkage priors
-for high-dimensional Bayesian mediation analysis, developed by Song et al
-(2018). \code{bama} provides estimates for the regression coefficients as
-well as the posterior inclusion probability for ranking mediators.
+\code{fdr.bama} uses the permutation method to estimate the null PIP
+distribution for each mediator and determines a threshold (based off of the
+\code{fdr} parameter) for significance.
 }
 \details{
-\code{bama} uses two regression models for the two conditional relationships,
-\eqn{Y | A, M, C} and \eqn{M | A, C}. For the outcome model, \code{bama}
-uses
-\deqn{Y = M \beta_M  + A * \beta_A + C* \beta_C + \epsilon_Y}
-For the mediator model, \code{bama} uses the model
-\deqn{M = A * \alpha_A + C * \alpha_C + \epsilon_M}
-
-For high dimensional tractability, \code{bama} employs continuous Bayesian
-shrinkage priors to select mediators and makes the two following assumptions:
-First, it assumes that all the potential mediators contribute small effects
-in mediating the exposure-outcome relationship. Second, it assumes
-that only a small proportion of mediators exhibit large effects
-("active" mediators). \code{bama} uses a Metropolis-Hastings within Gibbs
-MCMC to generate posterior samples from the model.
+TODO
 }
 \examples{
 library(bama)
@@ -110,23 +103,24 @@ A <- bama.data$a
 M <- as.matrix(bama.data[, paste0("m", 1:100)], nrow(bama.data))
 
 # We just include the intercept term in this example as we have no covariates
-# bama defaults C1 and C2 to be a matrix of 1s, so this is purely an
-# illustration.
-C <- matrix(1, 1000, 1)
+C1 <- matrix(1, 1000, 1)
+C2 <- matrix(1, 1000, 1)
 beta.m  <- rep(0, 100)
 alpha.a <- rep(0, 100)
 
 set.seed(12345)
-out <- bama(Y, A, M, C, C, beta.m, alpha.a, burnin = 1000, ndraws = 100)
+\donttest{
+out <- fdr.bama(Y, A, M, C1, C2, beta.m, alpha.a, burnin = 1000,
+                ndraws = 100, npermutations = 10)
 
-# The package includes a function to summarise output from 'bama'
-summary <- summary(out)
-head(summary)
+# The package includes a function to summarise output from 'fdr.bama'
+summary(out)
+}
 }
 \references{
 Song, Y, Zhou, X, Zhang, M, et al. Bayesian shrinkage estimation of high
 dimensional causal mediation effects in omics studies. Biometrics. 2019;
-1-11. [https://doi.org/10.1111/biom.13189]{https://doi.org/10.1111/biom.13189}
+1-11. \href{http://doi.org/10.1111/biom.13189}{doi:10.1111/biom.13189}
 }
 \author{
 Alexander Rix

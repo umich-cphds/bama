@@ -11,14 +11,14 @@ Bayesian Mediation Analysis
 
 Perform mediation analysis in the presence of high-dimensional mediators
 based on the potential outcome framework. Bayesian Mediation Analysis
-(BAMA), developed by Song et al (2019) <doi:10.1111/biom.13189>, relies
-on two Bayesian sparse linear mixed models to simultaneously analyze a
-relatively large number of mediators for a continuous exposure and
-outcome assuming a small number of mediators are truly active. This
-sparsity assumption also allows the extension of univariate mediator
-analysis by casting the identification of active mediators as a variable
-selection problem and applying Bayesian methods with continuous
-shrinkage priors on the effects.
+(BAMA), developed by Song et al (2019) , relies on two Bayesian sparse
+linear mixed models to simultaneously analyze a relatively large number
+of mediators for a continuous exposure and outcome assuming a small
+number of mediators are truly active. This sparsity assumption also
+allows the extension of univariate mediator analysis by casting the
+identification of active mediators as a variable selection problem and
+applying Bayesian methods with continuous shrinkage priors on the
+effects.
 
 Installation
 ------------
@@ -35,7 +35,7 @@ The Github version may contain new features or bug fixes not yet present
 on CRAN, so if you are experiencing issues, you may want to try the
 Github version of the package.
 
-If you wish to install the package via devtools, you will need a C++
+If you wish to install the package via `devtools`, you will need a C++
 compiler installed. This can be accomplished by installing Rtools on
 Windows and Xcode on MacOS.
 
@@ -55,7 +55,6 @@ We recommend using much larger numbers for `burnin` and `ndraws`, for
 example (30000, 1000).
 
     library(bama)
-    #> Loading required package: parallel
 
     Y <- bama.data$y
     A <- bama.data$a
@@ -88,4 +87,4 @@ Reference
 
 Song, Y, Zhou, X, Zhang, M, et al. Bayesian shrinkage estimation of high
 dimensional causal mediation effects in omics studies. Biometrics. 2019;
-1-11. <https://doi.org/10.1111/biom.13189>
+1-11. [doi:10.1111/biom.13189](https://doi.org/10.1111/biom.13189)

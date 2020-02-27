@@ -127,7 +127,7 @@ fdr.bama <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws,
         parallel::clusterExport(cl, list("Y", "A", "M", "C1", "C2", "beta.m",
                                          "alpha.a", "burnin", "ndraws", "k",
                                          "lm0", "lm1", "l", "pi2",  "pi3",
-                                         "pi4", "permutations", "seeds"),
+                                         "pi4", "seeds"),
                                 envir = environment()
         )
 

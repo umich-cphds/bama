@@ -33,6 +33,7 @@
 #'     the mediator model
 #' @param burnin number of iterations to run the MCMC before sampling
 #' @param ndraws number of draws to take from MCMC after the burnin period
+#' @param weights Length \code{n} numeric vector of weights
 #' @param k Shape parameter prior for inverse gamma
 #' @param lm0 Scale parameter prior for inverse gamma for the small normal
 #'    components
@@ -40,7 +41,7 @@
 #'    components
 #' @param l Scale parameter prior for the other inverse gamma distributions
 #' @return
-#' \code{bama} returns a object of type "bama" with 11 elements:
+#' \code{bama} returns a object of type "bama" with 12 elements:
 #' \describe{
 #' \item{beta.m}{\code{ndraws x p} matrix containing outcome model mediator
 #'       coefficients.
@@ -106,8 +107,8 @@
 #' 1-11. \href{http://doi.org/10.1111/biom.13189}{doi:10.1111/biom.13189}
 #' @author Alexander Rix
 #' @export
-bama <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws, k = 2.0,
-                 lm0 = 1e-4, lm1 = 1.0, l = 1.0)
+bama <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws,
+                 weights = NULL, k = 2.0, lm0 = 1e-4, lm1 = 1.0, l = 1.0)
 {
     call <- match.call()
 
@@ -173,6 +174,23 @@ bama <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws, k = 2.0,
 
     if (!is.numeric(l) || !is.vector(l) || length(l) != 1 || l < 0)
         stop("'l' should be a nonnegative number.")
+
+
+    if (!is.null(weights)) {
+        if (!is.numeric(weights) || !is.vector(weights) ||
+            length(weights) != n || any(weights < 0))
+        {
+            stop("'weights' must be a length 'n' nonnegative numeric vector.")
+        }
+
+        w  <- sqrt(weights)
+
+        Y  <- w * Y
+        A  <- w * A
+        M  <- apply(M, 2, function(m) m * w)
+        C1 <- apply(C1, 2, function(c1) c1 * w)
+        C2 <- apply(C2, 2, function(c2) c2 * w)
+    }
 
     bama.out <- run_bama_mcmc(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws,
                               k, lm0, lm1, l)

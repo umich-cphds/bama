@@ -14,6 +14,7 @@ bama(
   alpha.a,
   burnin,
   ndraws,
+  weights = NULL,
   k = 2,
   lm0 = 1e-04,
   lm1 = 1,
@@ -43,6 +44,8 @@ the mediator model}
 
 \item{ndraws}{number of draws to take from MCMC after the burnin period}
 
+\item{weights}{Length \code{n} numeric vector of weights}
+
 \item{k}{Shape parameter prior for inverse gamma}
 
 \item{lm0}{Scale parameter prior for inverse gamma for the small normal
@@ -54,7 +57,7 @@ components}
 \item{l}{Scale parameter prior for the other inverse gamma distributions}
 }
 \value{
-\code{bama} returns a object of type "bama" with 11 elements:
+\code{bama} returns a object of type "bama" with 12 elements:
 \describe{
 \item{beta.m}{\code{ndraws x p} matrix containing outcome model mediator
 coefficients.

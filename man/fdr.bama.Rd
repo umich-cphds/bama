@@ -14,6 +14,7 @@ fdr.bama(
   alpha.a,
   burnin,
   ndraws,
+  weights = NULL,
   npermutations = 200,
   fdr = 0.1,
   k = 2,
@@ -47,6 +48,8 @@ the mediator model}
 
 \item{ndraws}{Number of draws to take from MCMC after the burnin period}
 
+\item{weights}{Length \code{n} numeric vector of weights}
+
 \item{npermutations}{The number of permutations to generate while estimating
 the null pip distribution. Default is 200}
 
@@ -72,7 +75,7 @@ so see that for more information. Default is 1 core}
 Default is "PSOCK"}
 }
 \value{
-\code{fdr.bama} returns a object of type "fdr.bama" with 6 elements:
+\code{fdr.bama} returns a object of type "fdr.bama" with 5 elements:
 \describe{
 \item{bama.out}{Output from the \code{bama} run.}
 \item{pip.null}{A \code{p x npermutations} matrices containing the
@@ -86,7 +89,7 @@ for the false discovery rate.
 }
 }
 \description{
-\code{fdr.bama} uses the permutation method to estimate the null PIP
+\code{fdr.bama} uses the permutation test to estimate the null PIP
 distribution for each mediator and determines a threshold (based off of the
 \code{fdr} parameter) for significance.
 }

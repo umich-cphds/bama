@@ -1,10 +1,9 @@
 #' Bayesian Mediation Analysis Controlling For False Discovery
 #'
-#' \code{fdr.bama} uses the permutation method to estimate the null PIP
+#' \code{fdr.bama} uses the permutation test to estimate the null PIP
 #' distribution for each mediator and determines a threshold (based off of the
 #' \code{fdr} parameter) for significance.
 #'
-#' TODO
 #' @param Y Length \code{n} numeric outcome vector
 #' @param A Length \code{n} numeric exposure vector
 #' @param M \code{n x p} numeric matrix of mediators of Y and A
@@ -21,6 +20,7 @@
 #' @param fdr False discovery rate. Default is 0.1
 #' @param npermutations The number of permutations to generate while estimating
 #'     the null pip distribution. Default is 200
+#' @param weights Length \code{n} numeric vector of weights
 #' @param k Shape parameter prior for inverse gamma. Default is 2.0
 #' @param lm0 Scale parameter prior for inverse gamma for the small normal
 #'    components. Default is 1e-4
@@ -35,7 +35,7 @@
 #'     \code{makeCluster} in the \code{parallel} package for more details.
 #'     Default is "PSOCK"
 #' @return
-#' \code{fdr.bama} returns a object of type "fdr.bama" with 6 elements:
+#' \code{fdr.bama} returns a object of type "fdr.bama" with 5 elements:
 #' \describe{
 #' \item{bama.out}{Output from the \code{bama} run.}
 #' \item{pip.null}{A \code{p x npermutations} matrices containing the
@@ -77,13 +77,10 @@
 #' @author Alexander Rix
 #' @export
 fdr.bama <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws,
-                     npermutations = 200, fdr = 0.1, k = 2.0, lm0 = 1e-4,
-                     lm1 = 1.0, l = 1.0, mc.cores = 1, type = "PSOCK")
+                     weights = NULL, npermutations = 200, fdr = 0.1, k = 2.0,
+                     lm0 = 1e-4, lm1 = 1.0, l = 1.0, mc.cores = 1, type = "PSOCK")
 {
     call <- match.call()
-
-    bama.out <- bama(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws, k,
-                     lm0, lm1, l)
 
     if (npermutations <= 0)
         stop("'npermutations' must be a positive integer.")
@@ -91,9 +88,30 @@ fdr.bama <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws,
     if (fdr <= 0 || fdr >=1)
         stop("'fdr' must be in the interval (0, 1).")
 
+    bama.out <- bama(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws, weights,
+                     k, lm0, lm1, l)
+
     pi2 <- colMeans(bama.out$r1 == 0 & bama.out$r3 == 1)
     pi3 <- colMeans(bama.out$r1 == 1 & bama.out$r3 == 0)
     pi4 <- colMeans(bama.out$r1 == 0 & bama.out$r3 == 0)
+
+    n <- length(Y)
+    if (!is.null(weights)) {
+        print(weights)
+        if (!is.numeric(weights) || !is.vector(weights) ||
+            length(weights) != n || any(weights < 0))
+        {
+            stop("'weights' must be a length 'n' nonnegative numeric vector.")
+        }
+
+        w  <- sqrt(weights)
+
+        Y  <- w * Y
+        A  <- w * A
+        M  <- apply(M, 2, function(m) m * w)
+        C1 <- apply(C1, 2, function(c1) c1 * w)
+        C2 <- apply(C2, 2, function(c2) c2 * w)
+    }
 
     seeds <- sample(.Machine$integer.max, npermutations + 1)
     permute.bama <- function(i)
@@ -115,8 +133,9 @@ fdr.bama <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws,
         p3 <- colMeans(bama.r3$r1 == 1 & bama.r3$r3 == 0)
         p4 <- colMeans(bama.r1.r3$r1 == 0 & bama.r1.r3$r3 == 0)
 
-        pi2 / (p2 + p3 + p4) * p2 + pi3 / (p2 + p3 + p4) * p3 +
-        pi4 / (p2 + p3 + p4) * p4
+        # Adding small number to prevent divsion by 0 in certain cases
+        denom <- pi2 + pi3 + pi4 + 1e-9
+        p2 * pi2 / denom + p3 * pi3 / denom + p4 * pi4 / denom
     }
 
     if (mc.cores == 1) {
@@ -136,6 +155,7 @@ fdr.bama <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws,
     }
     set.seed(seeds[npermutations + 1])
 
+    # calculate the null pip threshold
     threshold <- apply(pip.null, 1, stats::quantile, probs = 1 - fdr)
     names(threshold) <- colnames(M)
 

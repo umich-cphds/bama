@@ -3,17 +3,18 @@
 ## New Features
 * `bama` now contains `fdr.bama`, a `bama` variant that controls for the false
     discovery rate by estimating the null PIP distribution via the permutation
-    test. It contains options to run in parallel (ie using the parallel package)
+    test. It contains options to run in parallel (ie using the `parallel` package)
     as well, since the permutation test can be time consuming. `fdr.bama` also
     contains a summary function, `summary.fdr.bama` to help summarize results.
 
 ## Major Changes
+* `bama` (and `fdr.bama`) now contain a weights parameter, `weights`.
 * Change k, lm0, lm1, l from hard coded parameters in the C++ code to user
     set parameters (with defaults).
 * Revert change that combined C1 and C2.
 
 ## Minor Changes
-* Revamp `bama` documentation to bring it in line with current quality.
+* Partial revamp `bama` documentation.
 * Edit DESCRIPTION, and README / vignette introduction.
 * Update DOI with (online) version of record.
 * Redo `bama` type checking.

@@ -20,7 +20,7 @@ default, \code{ci = c(0.025, .975)}.}
 }
 \value{
 A data.frame with 4 elements. The beta.m estimates, the estimates'
-\emph{credible} interval (which by default is 95\%), and the posterior
+\emph{credible} interval (which by default is 95\\%), and the posterior
 inclusion probability (pip) of each 'beta.m'.
 }
 \description{

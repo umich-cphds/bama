@@ -2,33 +2,49 @@
 % Please edit documentation in R/bama.R
 \name{bama}
 \alias{bama}
-\title{High Dimensional Bayesian Mediation}
+\title{Bayesian Mediation Analysis}
 \usage{
-bama(Y, A, M, C1 = matrix(1, length(Y)), C2 = matrix(1, length(Y)),
-  beta.m, alpha.a, burnin, ndraws, intercept = TRUE, k = 2,
-  lm0 = 1e-04, lm1 = 1, l = 1)
+bama(
+  Y,
+  A,
+  M,
+  C1,
+  C2,
+  beta.m,
+  alpha.a,
+  burnin,
+  ndraws,
+  weights = NULL,
+  k = 2,
+  lm0 = 1e-04,
+  lm1 = 1,
+  l = 1
+)
 }
 \arguments{
-\item{Y}{numeric outcome vector}
+\item{Y}{Length \code{n} numeric outcome vector}
 
-\item{A}{numeric exposure vector}
+\item{A}{Length \code{n} numeric exposure vector}
 
-\item{M}{numeric matrix of mediators of Y and A}
+\item{M}{\code{n x p} numeric matrix of mediators of Y and A}
 
-\item{C1}{numeric matrix of extra covariates to include in the outcome model}
+\item{C1}{\code{n x nc1} numeric matrix of extra covariates to include in the
+outcome model}
 
-\item{C2}{numeric matrix of extra covariates to include in the mediator model}
+\item{C2}{\code{n x nc2} numeric matrix of extra covariates to include in the
+mediator model}
 
-\item{beta.m}{numeric vector of initial beta.m in the outcome model}
+\item{beta.m}{Length \code{p} numeric vector of initial \code{beta.m} in the
+outcome model}
 
-\item{alpha.a}{numeric vector of initial alpha.a in the mediator model}
+\item{alpha.a}{Length \code{p} numeric vector of initial \code{alpha.a} in
+the mediator model}
 
 \item{burnin}{number of iterations to run the MCMC before sampling}
 
 \item{ndraws}{number of draws to take from MCMC after the burnin period}
 
-\item{intercept}{Whether or not to add an intercept to C1 and C2 if one is
-not there. Default is TRUE}
+\item{weights}{Length \code{n} numeric vector of weights}
 
 \item{k}{Shape parameter prior for inverse gamma}
 
@@ -41,32 +57,50 @@ components}
 \item{l}{Scale parameter prior for the other inverse gamma distributions}
 }
 \value{
-\code{bama} returns a object of type "bama" with 11 elements each of length
-\code{ndraws}), sampled from the burned in MCMC:
+\code{bama} returns a object of type "bama" with 12 elements:
 \describe{
-\item{beta.m}{Outcome model mediator coefficients}
-\item{r1}{Whether or not each beta.m belongs to the larger normal
-component (1) or smaller normal component (0)}
-\item{alpha.a}{Mediator model exposure coefficients}
-\item{r3}{Whether or not each alpha.a belongs to the larger normal
-component (1) or smaller normal component (0)}
-\item{beta.a}{beta.a coefficient}
-\item{pi.m}{Proportion of non zero beta.m coefficients}
-\item{pi.a}{Proportion of non zero alpha.a coefficients}
-\item{sigma.m0}{standard deviation of the smaller normal component for
-mediator-outcome coefficients (beta.m)}
-\item{sigma.m1}{standard deviation of the larger normal component for
-mediator-outcome coefficients (beta.m)}
-\item{sigma.ma0}{Standard deviation of the smaller normal component for
-exposure-mediator coefficients (alpha.a)}
-\item{sigma.ma1}{Standard deviation of the larger normal component for
-exposure-mediator coefficients (alpha.a)}
+\item{beta.m}{\code{ndraws x p} matrix containing outcome model mediator
+coefficients.
+}
+\item{r1}{\code{ndraws x p} matrix indicating whether or not each beta.m
+belongs to the larger normal component (1) or smaller normal
+component (0).
+}
+\item{alpha.a}{\code{ndraws x p} matrix containing the mediator model
+exposure coefficients.
+}
+\item{r3}{\code{ndraws x p} matrix indicating whether or not each alpha.a
+belongs to the larger normal component (1) or smaller normal component (0).
+}
+\item{beta.a}{Vector of length \code{ndraws} containing the beta.a coefficient.}
+\item{pi.m}{Vector of length \code{ndraws} containing the proportion of
+non zero beta.m coefficients.
+}
+\item{pi.a}{Vector of length \code{ndraws} containing the proportion of
+non zero alpha.a coefficients.
+}
+\item{sigma.m0}{Vector of length \code{ndraws} containing the standard
+deviation of the smaller normal component for mediator-outcome
+coefficients (beta.m).
+}
+\item{sigma.m1}{Vector of length \code{ndraws} containing standard deviation
+of the larger normal component for mediator-outcome coefficients (beta.m).
+}
+\item{sigma.ma0}{Vector of length \code{ndraws} containing standard
+deviation of the smaller normal component for exposure-mediator
+coefficients (alpha.a).
+}
+\item{sigma.ma1}{Vector of length \code{ndraws} containing standard deviation
+of the larger normal component for exposure-mediator coefficients
+(alpha.a).
+}
+\item{call}{The R call that generated the output.}
 }
 }
 \description{
 \code{bama} is a Bayesian inference method that uses continuous shrinkage priors
 for high-dimensional Bayesian mediation analysis, developed by Song et al
-(2018). \code{bama} provides estimates for the regression coefficients as
+(2019). \code{bama} provides estimates for the regression coefficients as
 well as the posterior inclusion probability for ranking mediators.
 }
 \details{
@@ -95,24 +129,22 @@ A <- bama.data$a
 M <- as.matrix(bama.data[, paste0("m", 1:100)], nrow(bama.data))
 
 # We just include the intercept term in this example as we have no covariates
-# bama defaults C1 and C2 to be a matrix of 1s, so this is purely an
-# illustration.
-C <- matrix(1, 1000, 1)
+C1 <- matrix(1, 1000, 1)
+C2 <- matrix(1, 1000, 1)
 beta.m  <- rep(0, 100)
 alpha.a <- rep(0, 100)
 
 set.seed(12345)
-out <- bama(Y, A, M, C, C, beta.m, alpha.a, burnin = 1000, ndraws = 100)
+out <- bama(Y, A, M, C1, C2, beta.m, alpha.a, burnin = 1000, ndraws = 100)
 
 # The package includes a function to summarise output from 'bama'
 summary <- summary(out)
 head(summary)
 }
 \references{
-Song, Y. , Zhou, X. , Zhang, M. , Zhao, W. , Liu, Y. , Kardia, S. L., Roux, A. V.,
-Needham, B. L., Smith, J. A. and Mukherjee, B. (2019), Bayesian shrinkage
-estimation of high dimensional causal mediation effects in omics studies.
-Biometrics. Accepted Author Manuscript. \href{https://doi.org/10.1111/biom.13189}{10.1111/biom.13189}
+Song, Y, Zhou, X, Zhang, M, et al. Bayesian shrinkage estimation of high
+dimensional causal mediation effects in omics studies. Biometrics. 2019;
+1-11. \href{http://doi.org/10.1111/biom.13189}{doi:10.1111/biom.13189}
 }
 \author{
 Alexander Rix

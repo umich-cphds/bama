@@ -1,6 +1,6 @@
 Package: bama
 Title: High Dimensional Bayesian Mediation Analysis
-Version: 0.9.2
+Version: 1.0.0
 URL: https://github.com/umich-cphds/bama
 BugReports: https://github.com/umich-cphds/bama/issues
 Authors@R:
@@ -26,12 +26,15 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.0
 LinkingTo:
     Rcpp,
     RcppArmadillo
 Imports:
-    Rcpp
+    Rcpp,
+    parallel
+Depends:
+    R (>= 3.5)
 Suggests:
     knitr,
     rmarkdown

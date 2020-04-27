@@ -1,20 +1,24 @@
 <!-- badges: start -->
 [![CRAN
-Version](https://www.r-pkg.org/badges/version/bama)](https://cran.r-project.org/package=bama)
-[![Github
-Version](https://img.shields.io/badge/Github-0.9.2-informational.svg?style=flat)](commits/master)
+Version](https://img.shields.io/cran/v/bama?style=flat-square&color=blue&label=CRAN)](https://cran.r-project.org/package=bama)
+[![GitHub
+Release](https://img.shields.io/github/v/release/umich-cphds/bama?include_prereleases&label=Github&style=flat-square)](https://github.com/umich-cphds/bama)
 [![Travis
-CI](https://travis-ci.org/umich-cphds/bama.svg?branch=master)](https://travis-ci.org/umich-cphds/bama)
-<!-- badges: end -->
+CI](https://img.shields.io/travis/umich-cphds/bama?style=flat-square)](https://travis-ci.org/umich-cphds/bama)
 
 Bayesian Mediation Analysis
 ===========================
 
-`bama` is a Bayesian inference method that uses continuous shrinkage
-priors for high-dimensional Bayesian mediation analysis, developed by
-Song et al (2018). `bama` provides estimates for the regression
-coefficients as well as the posterior inclusion probability for ranking
-mediators.
+Perform mediation analysis in the presence of high-dimensional mediators
+based on the potential outcome framework. Bayesian Mediation Analysis
+(BAMA), developed by Song et al (2019), relies on two Bayesian sparse
+linear mixed models to simultaneously analyze a relatively large number
+of mediators for a continuous exposure and outcome assuming a small
+number of mediators are truly active. This sparsity assumption also
+allows the extension of univariate mediator analysis by casting the
+identification of active mediators as a variable selection problem and
+applying Bayesian methods with continuous shrinkage priors on the
+effects.
 
 Installation
 ------------
@@ -27,7 +31,11 @@ Or devtools
 
     devtools::install_github("umich-cphds/bama", build_opts = c())
 
-If you wish to install the package via devtools, you will need a C++
+The Github version may contain new features or bug fixes not yet present
+on CRAN, so if you are experiencing issues, you may want to try the
+Github version of the package.
+
+If you wish to install the package via `devtools`, you will need a C++
 compiler installed. This can be accomplished by installing Rtools on
 Windows and Xcode on MacOS.
 
@@ -61,7 +69,8 @@ example (30000, 1000).
     alpha.a <- rep(0, 100)
 
     set.seed(1245)
-    bama.out <- bama(Y, A, M, C1, C2, beta.m, alpha.a, burnin = 1000, ndraws = 100)
+    bama.out <- bama(Y, A, M, beta.m, alpha.a, C1 = C2, C2 = C2, burnin = 1000,
+                     ndraws = 100)
 
     # Rank mediators and see summary information
     head(summary(bama.out, rank = T))
@@ -76,8 +85,6 @@ example (30000, 1000).
 Reference
 =========
 
-Song, Y. , Zhou, X. , Zhang, M. , Zhao, W. , Liu, Y. , Kardia, S. L.,
-Roux, A. V., Needham, B. L., Smith, J. A. and Mukherjee, B. (2019),
-Bayesian shrinkage estimation of high dimensional causal mediation
-effects in omics studies. Biometrics. Accepted Author Manuscript.
-[10.1111/biom.13189](https://doi.org/10.1111/biom.13189)
+Song, Y, Zhou, X, Zhang, M, et al. Bayesian shrinkage estimation of high
+dimensional causal mediation effects in omics studies. Biometrics. 2019;
+1-11. [doi:10.1111/biom.13189](https://doi.org/10.1111/biom.13189)

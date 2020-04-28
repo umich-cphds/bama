@@ -33,13 +33,18 @@ double rand_norm(double mu, double sigma_sq)
 // the function signatures considerably.
 struct bama_mcmc {
 
-    double sigma_e;
-    double sigma_g;
+    double k;
+    double lm0;
+    double lm1;
+    double l;
+
     double sigma_m0;
     double sigma_m1;
     double sigma_ma0;
     double sigma_ma1;
     double sigma_a;
+    double sigma_e;
+    double sigma_g;
 
     double    beta_a;
     arma::vec beta_m;
@@ -65,16 +70,15 @@ struct bama_mcmc {
     double pi_m;
     double pi_a;
 
-
-    double k;
-    double lm0;
-    double lm1;
-    double l;
-
     bama_mcmc(arma::vec &Y, arma::vec &A, arma::mat &M, arma::mat &C1,
                   arma::mat &C2, arma::vec &beta_m, arma::vec &alpha_a,
                   double k, double lm0, double lm1, double l)
     {
+        this->k   = k;
+        this->lm0 = lm0;
+        this->lm1 = lm1;
+        this->l   = l;
+
         sigma_m0  = rand_invgamma(k, lm0);
         sigma_m1  = rand_invgamma(k, lm1);
         sigma_ma0 = rand_invgamma(k, lm0);
@@ -129,11 +133,6 @@ struct bama_mcmc {
         pi_m = std::min(0.9, std::max(0.1, pi_m));
         pi_a = mean(abs(alpha_a) > EPSILON);
         pi_a = std::min(0.9, std::max(0.1, pi_a));
-
-        this->k   = k;
-        this->lm0 = lm0;
-        this->lm0 = lm0;
-        this->l   = l;
     }
 
     void update_beta_m(arma::mat &M, arma::vec &var_m0, arma::vec &var_m1)
@@ -315,12 +314,13 @@ Rcpp::List run_bama_mcmc(arma::vec &Y, arma::vec &A, arma::mat &M, arma::mat &C1
                              double lm0, double lm1, double l)
 {
     bama_mcmc mcmc = bama_mcmc(Y, A, M, C1, C2, beta_m_init, alpha_a_init, k,
-                                   lm0, lm1, l);
+                               lm0, lm1, l);
 
     // Run mcmc for the number of specified burnin iterations.
     for (int i = 0; i < burnin; ++i)
          mcmc.iterate(A, M, C1, C2);
 
+    // allocate output
     auto beta_m    = Rcpp::NumericMatrix(ndraws, beta_m_init.n_elem);
     auto r1        = Rcpp::NumericMatrix(ndraws, beta_m_init.n_elem);
     auto alpha_a   = Rcpp::NumericMatrix(ndraws, alpha_a_init.n_elem);
@@ -365,12 +365,12 @@ Rcpp::List run_bama_mcmc(arma::vec &Y, arma::vec &A, arma::mat &M, arma::mat &C1
     }
 
     // Wrap up samples in a named R list and return.
-    return Rcpp::List::create(Rcpp::Named("beta.m") = beta_m,
-        Rcpp::Named("r1") = r1, Rcpp::Named("alpha.a") = alpha_a,
-        Rcpp::Named("r3") = r3, Rcpp::Named("beta.a") = beta_a,
-        Rcpp::Named("pi.m") = pi_m, Rcpp::Named("pi.a") = pi_a,
-        Rcpp::Named("sigma.m0") = sigma_m0, Rcpp::Named("sigma.m1") = sigma_m1,
-        Rcpp::Named("sigma.ma0") = sigma_ma0,
+    return Rcpp::List::create(
+        Rcpp::Named("beta.m") = beta_m, Rcpp::Named("r1") = r1,
+        Rcpp::Named("alpha.a") = alpha_a, Rcpp::Named("r3") = r3,
+        Rcpp::Named("beta.a") = beta_a, Rcpp::Named("pi.m") = pi_m,
+        Rcpp::Named("pi.a") = pi_a, Rcpp::Named("sigma.m0") = sigma_m0,
+        Rcpp::Named("sigma.m1") = sigma_m1, Rcpp::Named("sigma.ma0") = sigma_ma0,
         Rcpp::Named("sigma.ma1") = sigma_ma1
     );
 }

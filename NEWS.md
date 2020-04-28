@@ -1,3 +1,8 @@
+# bama v1.0.1
+
+## Bug Fix
+* `lm1` in the C++ was not being initialized. This has been fixed.
+
 # bama v1.0.0
 
 ## New Features

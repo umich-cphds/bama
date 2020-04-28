@@ -1,6 +1,6 @@
 Package: bama
 Title: High Dimensional Bayesian Mediation Analysis
-Version: 1.0.0
+Version: 1.0.1
 URL: https://github.com/umich-cphds/bama
 BugReports: https://github.com/umich-cphds/bama/issues
 Authors@R:

@@ -1,6 +1,5 @@
 ---
 title: "Bayesian Mediation Analysis in R"
-author: "Alexander Rix <alexrix@umich.edu>"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Bayesian Mediation Analysis in R}

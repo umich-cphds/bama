@@ -97,6 +97,8 @@ If \code{method = "GMM"}
 \item{h2}{ - inverse gamma shape prior for sigma.sq.g}
 \item{l2}{ - inverse gamma scale prior for sigma.sq.g}
 }}
+
+\item{seed}{numeric seed for GIBBS sampler}
 }
 \value{
 If method = "BSLMM", then \code{bama} returns a object of type "bama" with 12 elements:
@@ -225,6 +227,7 @@ out <- bama(Y = Y, A = A, M = M, C1 = C1, C2 = C2, method = "BSLMM", seed = 1234
 # The package includes a function to summarise output from 'bama'
 summary <- summary(out)
 head(summary)
+\donttest{
 
 # Product Threshold Gaussian 
 ptgmod = bama(Y = Y, A = A, M = M, C1 = C1, C2 = C2, method = "PTG", seed = 1234,
@@ -249,6 +252,8 @@ apply(gmmmod$alpha.a, 2, mean)
 mean(gmmmod$sigma.sq.a)
 mean(gmmmod$sigma.sq.e)
 mean(gmmmod$sigma.sq.g)
+
+}
 
 }
 \references{

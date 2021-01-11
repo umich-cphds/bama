@@ -111,7 +111,7 @@ alpha.a <- rep(0, 100)
 set.seed(12345)
 \donttest{
 out <- fdr.bama(Y, A, M, C1, C2, beta.m, alpha.a, burnin = 1000,
-                ndraws = 100, npermutations = 10)
+                ndraws = 1100, npermutations = 10)
 
 # The package includes a function to summarise output from 'fdr.bama'
 summary(out)

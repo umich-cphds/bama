@@ -42,6 +42,7 @@
 #'     the mediator model. See details for equation}
 #' }
 #' @param burnin number of iterations to run the MCMC before sampling
+#' @param seed numeric seed for GIBBS sampler
 #' @param ndraws number of draws to take from MCMC (includes burnin draws)
 #' @param weights Length \code{n} numeric vector of weights
 #' @param control list of Gibbs algorithm control options. These include prior
@@ -194,6 +195,7 @@
 #' # The package includes a function to summarise output from 'bama'
 #' summary <- summary(out)
 #' head(summary)
+#' \donttest{
 #' 
 #' # Product Threshold Gaussian 
 #' ptgmod = bama(Y = Y, A = A, M = M, C1 = C1, C2 = C2, method = "PTG", seed = 1234,
@@ -218,6 +220,8 @@
 #' mean(gmmmod$sigma.sq.a)
 #' mean(gmmmod$sigma.sq.e)
 #' mean(gmmmod$sigma.sq.g)
+#' 
+#' }
 #' 
 #' @references
 #' Song, Y, Zhou, X, Zhang, M, et al. Bayesian shrinkage estimation of high

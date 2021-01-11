@@ -65,7 +65,7 @@
 #' set.seed(12345)
 #' \donttest{
 #' out <- fdr.bama(Y, A, M, C1, C2, beta.m, alpha.a, burnin = 1000,
-#'                 ndraws = 100, npermutations = 10)
+#'                 ndraws = 1100, npermutations = 10)
 #'
 #' # The package includes a function to summarise output from 'fdr.bama'
 #' summary(out)
@@ -88,8 +88,9 @@ fdr.bama <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws,
     if (fdr <= 0 || fdr >=1)
         stop("'fdr' must be in the interval (0, 1).")
 
-    bama.out <- bama(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws, weights,
-                     k, lm0, lm1, l)
+    bama.out <- bama(Y = Y, A = A, M = M, C1 = C1, C2 = C2, method = "BSLMM",
+                     burnin = burnin, ndraws = ndraws, weights = weights, 
+                     control = list(k = k, lm0 = lm0, lm1 = lm1, l = l))
 
     pi2 <- colMeans(bama.out$r1 == 0 & bama.out$r3 == 1)
     pi3 <- colMeans(bama.out$r1 == 1 & bama.out$r3 == 0)

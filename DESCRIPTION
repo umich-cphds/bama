@@ -6,6 +6,10 @@ BugReports: https://github.com/umich-cphds/bama/issues
 Authors@R:
     c(person(given = "Alexander",
            family = "Rix",
+           role = c("aut"),
+           email = "mkleinsa@umich.edu"),
+           person(given = "Mike",
+           family = "Kleinsasser",
            role = c("aut", "cre"),
            email = "alexrix@umich.edu"),
       person(given = "Yanyi",

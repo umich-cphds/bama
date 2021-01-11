@@ -93,9 +93,6 @@ for the false discovery rate.
 distribution for each mediator and determines a threshold (based off of the
 \code{fdr} parameter) for significance.
 }
-\details{
-TODO
-}
 \examples{
 library(bama)
 

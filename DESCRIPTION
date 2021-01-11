@@ -26,13 +26,16 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 LinkingTo:
     Rcpp,
-    RcppArmadillo
+    RcppArmadillo,
+    RcppDist,
+    BH
 Imports:
     Rcpp,
-    parallel
+    parallel,
+    BH
 Depends:
     R (>= 3.5)
 Suggests:

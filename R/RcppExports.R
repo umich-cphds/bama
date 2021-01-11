@@ -7,3 +7,19 @@ run_bama_mcmc <- function(Y, A, M, C1, C2, beta_m_init, alpha_a_init, burnin, nd
     .Call('_bama_run_bama_mcmc', PACKAGE = 'bama', Y, A, M, C1, C2, beta_m_init, alpha_a_init, burnin, ndraws, k, lm0, lm1, l)
 }
 
+ptg <- function(Y, A, M, C1, C2, burnin, ndraws, seed, lambda0, lambda1, lambda2, ha, la, h1, l1, h2, l2, km, lm, kma, lma, samples_betam, samples_alphaa, betam_member, alphaa_member, samples_betaa, samples_alphac, samples_betac, samples_sigmasqa, samples_sigmasqe, samples_sigmasqg) {
+    invisible(.Call('_bama_ptg', PACKAGE = 'bama', Y, A, M, C1, C2, burnin, ndraws, seed, lambda0, lambda1, lambda2, ha, la, h1, l1, h2, l2, km, lm, kma, lma, samples_betam, samples_alphaa, betam_member, alphaa_member, samples_betaa, samples_alphac, samples_betac, samples_sigmasqa, samples_sigmasqe, samples_sigmasqg))
+}
+
+rdirichletcpp <- function(alpha_m) {
+    .Call('_bama_rdirichletcpp', PACKAGE = 'bama', alpha_m)
+}
+
+rand_igamma <- function(shape, scale) {
+    .Call('_bama_rand_igamma', PACKAGE = 'bama', shape, scale)
+}
+
+gmm <- function(Y, A, M, C1, C2, burnin, ndraws, seed, phi0, phi1, a0, a1, a2, a3, h1, l1, h2, l2, ha, la, samples_betam, samples_alphaa, betam_member, alphaa_member, samples_betaa, samples_alphac, samples_betac, samples_sigmasqa, samples_sigmasqe, samples_sigmasqg) {
+    invisible(.Call('_bama_gmm', PACKAGE = 'bama', Y, A, M, C1, C2, burnin, ndraws, seed, phi0, phi1, a0, a1, a2, a3, h1, l1, h2, l2, ha, la, samples_betam, samples_alphaa, betam_member, alphaa_member, samples_betaa, samples_alphac, samples_betac, samples_sigmasqa, samples_sigmasqe, samples_sigmasqg))
+}
+

@@ -1,4 +1,5 @@
 <!-- badges: start -->
+
 [![CRAN
 Version](https://img.shields.io/cran/v/bama?style=flat-square&color=blue&label=CRAN)](https://cran.r-project.org/package=bama)
 [![GitHub
@@ -52,7 +53,7 @@ with a numeric response `y`, numeric exposure `a` and 100 numeric
 mediators named `m1, m2, ..., m100`.
 
 We recommend using much larger numbers for `burnin` and `ndraws`, for
-example (30000, 1000).
+example (30000, 35000).
 
     library(bama)
 
@@ -62,29 +63,52 @@ example (30000, 1000).
     # grab the mediators from the example data.frame
     M <- as.matrix(bama.data[, paste0("m", 1:100)], nrow(bama.data))
 
-    # We just include the intercept term in this example.
-    C1 <- matrix(1, nrow(M), 1)
-    C2 <- matrix(1, nrow(M), 1)
+    # We just include the intercept term in this example as we have no covariates
+    C1 <- matrix(1, 1000, 1)
+    C2 <- matrix(1, 1000, 1)
     beta.m  <- rep(0, 100)
     alpha.a <- rep(0, 100)
 
-    set.seed(1245)
-    bama.out <- bama(Y, A, M, beta.m, alpha.a, C1 = C2, C2 = C2, burnin = 1000,
-                     ndraws = 100)
+    out <- bama(Y = Y, A = A, M = M, C1 = C1, C2 = C2, method = "BSLMM", seed = 1234,
+                burnin = 1000, ndraws = 1100, weights = NULL, inits = NULL, 
+                control = list(k = 2, lm0 = 1e-04, lm1 = 1, l = 1))
 
-    # Rank mediators and see summary information
-    head(summary(bama.out, rank = T))
-    #>        estimate    ci.lower     ci.upper  pip
-    #> m12  0.18576755  0.12218219  0.253780289 0.99
-    #> m65 -0.23979113 -0.30642142 -0.165385815 0.99
-    #> m89 -0.14252621 -0.21202100 -0.065313879 0.91
-    #> m97 -0.04289325 -0.10325313  0.007526357 0.31
-    #> m90 -0.03041407 -0.08301040  0.012826983 0.17
-    #> m93  0.04051381 -0.00547444  0.118579967 0.17
+    # The package includes a function to summarise output from 'bama'
+    summary <- summary(out)
+    head(summary)
 
-Reference
-=========
+    # Product Threshold Gaussian 
+    ptgmod = bama(Y = Y, A = A, M = M, C1 = C1, C2 = C2, method = "PTG", seed = 1234,
+                  burnin = 1000, ndraws = 1100, weights = NULL, inits = NULL, 
+                  control = list(lambda0 = 0.04, lambda1 = 0.2, lambda2 = 0.2))
 
-Song, Y, Zhou, X, Zhang, M, et al. Bayesian shrinkage estimation of high
+    mean(ptgmod$beta.a)
+    apply(ptgmod$beta.m, 2, mean)
+    apply(ptgmod$alpha.a, 2, mean)
+    apply(ptgmod$betam_member, 2, mean)
+    apply(ptgmod$alphaa_member, 2, mean)
+
+    # Gaussian Mixture Model
+    gmmmod = bama(Y = Y, A = A, M = M, C1 = C1, C2 = C2, method = "GMM", seed = 1234,
+                  burnin = 1000, ndraws = 1100, weights = NULL, inits = NULL, 
+                  control = list(phi0 = 0.01, phi1 = 0.01))
+
+    mean(gmmmod$beta.a)
+    apply(gmmmod$beta.m, 2, mean)
+    apply(gmmmod$alpha.a, 2, mean)
+
+    mean(gmmmod$sigma.sq.a)
+    mean(gmmmod$sigma.sq.e)
+    mean(gmmmod$sigma.sq.g)
+
+References
+==========
+
+Song, Y, Zhou, X, Zhang, M, et al. Bayesian shrinkage estimation of high
 dimensional causal mediation effects in omics studies. Biometrics. 2019;
 1-11. [doi:10.1111/biom.13189](https://doi.org/10.1111/biom.13189)
+
+Song, Yanyi, Xiang Zhou, Jian Kang, Max T. Aung, Min Zhang, Wei Zhao,
+Belinda L. Needham et al. “Bayesian Sparse Mediation Analysis with
+Targeted Penalization of Natural Indirect Effects.” arXiv preprint
+arXiv:2008.06366 (2020).

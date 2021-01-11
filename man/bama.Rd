@@ -10,15 +10,15 @@ bama(
   M,
   C1,
   C2,
-  beta.m,
-  alpha.a,
+  method,
   burnin,
   ndraws,
   weights = NULL,
-  k = 2,
-  lm0 = 1e-04,
-  lm1 = 1,
-  l = 1
+  inits = NULL,
+  control = list(k = 2, lm0 = 1e-04, lm1 = 1, l = 1, lambda0 = 0.04, lambda1 = 0.2,
+    lambda2 = 0.2, phi0 = 0.01, phi1 = 0.01, a0 = 0.01 * ncol(M), a1 = 0.05 * ncol(M), a2
+    = 0.05 * ncol(M), a3 = 0.89 * ncol(M)),
+  seed = NULL
 )
 }
 \arguments{
@@ -34,30 +34,72 @@ outcome model}
 \item{C2}{\code{n x nc2} numeric matrix of extra covariates to include in the
 mediator model}
 
-\item{beta.m}{Length \code{p} numeric vector of initial \code{beta.m} in the
-outcome model}
-
-\item{alpha.a}{Length \code{p} numeric vector of initial \code{alpha.a} in
-the mediator model}
+\item{method}{String indicating which method to use. Options are
+\itemize{
+\item{"BSLMM"}{ - mixture of two normal components; Song et al. 2019}
+\item{"PTG"}{ - product threshold Gaussian prior; Song et al. 2020}
+\item{"GMM"}{ - four-component Gaussian mixture prior; Song et al. 2020}
+}}
 
 \item{burnin}{number of iterations to run the MCMC before sampling}
 
-\item{ndraws}{number of draws to take from MCMC after the burnin period}
+\item{ndraws}{number of draws to take from MCMC (includes burnin draws)}
 
 \item{weights}{Length \code{n} numeric vector of weights}
 
-\item{k}{Shape parameter prior for inverse gamma}
+\item{inits}{list of initial values for the Gibbs sampler. Options are
+\itemize{
+\item{beta.m}{ - Length \code{p} numeric vector of initial \code{beta.m} in the
+outcome model. See details for equation}
+\item{alpha.a}{ - Length \code{p} numeric vector of initial \code{alpha.a} in
+the mediator model. See details for equation}
+}}
 
-\item{lm0}{Scale parameter prior for inverse gamma for the small normal
+\item{control}{list of Gibbs algorithm control options. These include prior
+and hyper-prior parameters. Options vary by method selection. If
+\code{method = "BSLMM"}
+\itemize{
+\item{k}{ - Shape parameter prior for inverse gamma}
+\item{lm0}{ - Scale parameter prior for inverse gamma for the small normal
 components}
-
-\item{lm1}{Scale parameter prior for inverse gamma for the large normal
+\item{lm1}{ - Scale parameter prior for inverse gamma for the large normal
 components}
-
-\item{l}{Scale parameter prior for the other inverse gamma distributions}
+\item{l}{ - Scale parameter prior for the other inverse gamma distributions}
+}
+If \code{method = "PTG"}
+\itemize{
+\item{lambda0}{ - threshold parameter for product of alpha.a and beta.m effect}
+\item{lambda1}{ - threshold parameter for beta.m effect}
+\item{lambda2}{ - threshold parameter for alpha.a effect}
+\item{ha}{ - inverse gamma shape prior for sigma.sq.a}
+\item{la}{ - inverse gamma scale prior for sigma.sq.a}
+\item{h1}{ - inverse gamma shape prior for sigma.sq.e}
+\item{l1}{ - inverse gamma scale prior for sigma.sq.e}
+\item{h2}{ - inverse gamma shape prior for sigma.sq.g}
+\item{l2}{ - inverse gamma scale prior for sigma.sq.g}
+\item{km}{ - inverse gamma shape prior for tau.sq.b}
+\item{lm}{ - inverse gamma scale prior for tau.sq.b}
+\item{kma}{ - inverse gamma shape prior for tau.sq.a}
+\item{lma}{ - inverse gamma scale prior for tau.sq.a}
+}
+If \code{method = "GMM"}
+\itemize{
+\item{phi0}{ - prior beta.m variance}
+\item{phi1}{ - prior alpha.a variance}
+\item{a0}{ - prior count of non-zero beta.m and alpha.a effects}
+\item{a1}{ - prior count of non-zero beta.m and zero alpha.a effects}
+\item{a2}{ - prior count of zero beta.m and non-zero alpha.a effects}
+\item{a3}{ - prior count of zero beta.m and zero alpha.a effects}
+\item{ha}{ - inverse gamma shape prior for sigma.sq.a}
+\item{la}{ - inverse gamma scale prior for sigma.sq.a}
+\item{h1}{ - inverse gamma shape prior for sigma.sq.e}
+\item{l1}{ - inverse gamma scale prior for sigma.sq.e}
+\item{h2}{ - inverse gamma shape prior for sigma.sq.g}
+\item{l2}{ - inverse gamma scale prior for sigma.sq.g}
+}}
 }
 \value{
-\code{bama} returns a object of type "bama" with 12 elements:
+If method = "BSLMM", then \code{bama} returns a object of type "bama" with 12 elements:
 \describe{
 \item{beta.m}{\code{ndraws x p} matrix containing outcome model mediator
 coefficients.
@@ -96,11 +138,53 @@ of the larger normal component for exposure-mediator coefficients
 }
 \item{call}{The R call that generated the output.}
 }
+
+If method = "GMM", then \code{bama} returns a object of type "bama" with:
+\describe{
+\item{beta.m}{\code{ndraws x p} matrix containing outcome model mediator
+coefficients.}
+\item{alpha.a}{\code{ndraws x p} matrix containing the mediator model
+exposure coefficients.}
+\item{betam_member}{\code{ndraws x p} matrix of 1's and 0's where
+item = 1 only if beta.m is non-zero.}
+\item{alphaa_member}{\code{ndraws x p} matrix of 1's and 0's where
+item = 1 only if alpha.a is non-zero.}
+\item{alpha.c}{\code{ndraws x (q2 + p)} matrix containing alpha_c coefficients.
+Since alpha.c is a matrix of dimension q2 x p, the draws are indexed as
+alpha_c(w, j) = w * p + j}
+\item{beta.c}{\code{ndraws x q1} matrix containing beta_c coefficients.
+Since beta.c is a matrix of dimension q1 x p}
+\item{beta.a}{Vector of length \code{ndraws} containing the beta.a coefficient.}
+\item{sigma.sq.a}{Vector of length \code{ndraws} variance of beta.a effect}
+\item{sigma.sq.e}{Vector of length \code{ndraws} variance of outcome model error}
+\item{sigma.sq.g}{Vector of length \code{ndraws} variance of mediator model error}
+}
+
+If method = "PTG", then \code{bama} returns a object of type "bama" with:
+\describe{
+\item{beta.m}{\code{ndraws x p} matrix containing outcome model mediator
+coefficients.}
+\item{alpha.a}{\code{ndraws x p} matrix containing the mediator model
+exposure coefficients.}
+\item{alpha.c}{\code{ndraws x (q2 + p)} matrix containing alpha_c coefficients.
+Since alpha.c is a matrix of dimension q2 x p, the draws are indexed as
+alpha_c(w, j) = w * p + j}
+\item{beta.c}{\code{ndraws x q1} matrix containing beta_c coefficients.
+Since beta.c is a matrix of dimension q1 x p}
+\item{betam_member}{\code{ndraws x p} matrix of 1's and 0's where
+item = 1 only if beta.m is non-zero.}
+\item{alphaa_member}{\code{ndraws x p} matrix of 1's and 0's where
+item = 1 only if alpha.a is non-zero.}
+\item{beta.a}{Vector of length \code{ndraws} containing the beta.a coefficient.}
+\item{sigma.sq.a}{Vector of length \code{ndraws} variance of beta.a effect}
+\item{sigma.sq.e}{Vector of length \code{ndraws} variance of outcome model error}
+\item{sigma.sq.g}{Vector of length \code{ndraws} variance of mediator model error}
+}
 }
 \description{
 \code{bama} is a Bayesian inference method that uses continuous shrinkage priors
 for high-dimensional Bayesian mediation analysis, developed by Song et al
-(2019). \code{bama} provides estimates for the regression coefficients as
+(2019, 2020). \code{bama} provides estimates for the regression coefficients as
 well as the posterior inclusion probability for ranking mediators.
 }
 \details{
@@ -134,18 +218,46 @@ C2 <- matrix(1, 1000, 1)
 beta.m  <- rep(0, 100)
 alpha.a <- rep(0, 100)
 
-set.seed(12345)
-out <- bama(Y, A, M, C1, C2, beta.m, alpha.a, burnin = 1000, ndraws = 100)
+out <- bama(Y = Y, A = A, M = M, C1 = C1, C2 = C2, method = "BSLMM", seed = 1234,
+            burnin = 1000, ndraws = 1100, weights = NULL, inits = NULL, 
+            control = list(k = 2, lm0 = 1e-04, lm1 = 1, l = 1))
 
 # The package includes a function to summarise output from 'bama'
 summary <- summary(out)
 head(summary)
+
+# Product Threshold Gaussian 
+ptgmod = bama(Y = Y, A = A, M = M, C1 = C1, C2 = C2, method = "PTG", seed = 1234,
+              burnin = 1000, ndraws = 1100, weights = NULL, inits = NULL, 
+              control = list(lambda0 = 0.04, lambda1 = 0.2, lambda2 = 0.2))
+
+mean(ptgmod$beta.a)
+apply(ptgmod$beta.m, 2, mean)
+apply(ptgmod$alpha.a, 2, mean)
+apply(ptgmod$betam_member, 2, mean)
+apply(ptgmod$alphaa_member, 2, mean)
+
+# Gaussian Mixture Model
+gmmmod = bama(Y = Y, A = A, M = M, C1 = C1, C2 = C2, method = "GMM", seed = 1234,
+              burnin = 1000, ndraws = 1100, weights = NULL, inits = NULL, 
+              control = list(phi0 = 0.01, phi1 = 0.01))
+
+mean(gmmmod$beta.a)
+apply(gmmmod$beta.m, 2, mean)
+apply(gmmmod$alpha.a, 2, mean)
+
+mean(gmmmod$sigma.sq.a)
+mean(gmmmod$sigma.sq.e)
+mean(gmmmod$sigma.sq.g)
+
 }
 \references{
 Song, Y, Zhou, X, Zhang, M, et al. Bayesian shrinkage estimation of high
 dimensional causal mediation effects in omics studies. Biometrics. 2019;
 1-11. \href{http://doi.org/10.1111/biom.13189}{doi:10.1111/biom.13189}
-}
-\author{
-Alexander Rix
+
+Song, Yanyi, Xiang Zhou, Jian Kang, Max T. Aung, Min Zhang, Wei Zhao,
+Belinda L. Needham et al. "Bayesian Sparse Mediation Analysis with
+Targeted Penalization of Natural Indirect Effects."
+arXiv preprint arXiv:2008.06366 (2020).
 }

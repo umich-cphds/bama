@@ -64,8 +64,8 @@
 #'
 #' set.seed(12345)
 #' \donttest{
-#' out <- fdr.bama(Y, A, M, C1, C2, beta.m, alpha.a, burnin = 1000,
-#'                 ndraws = 1100, npermutations = 10)
+#' out <- fdr.bama(Y, A, M, C1, C2, beta.m, alpha.a, burnin = 100,
+#'                 ndraws = 120, npermutations = 10)
 #'
 #' # The package includes a function to summarise output from 'fdr.bama'
 #' summary(out)
@@ -73,7 +73,7 @@
 #' @references
 #' Song, Y, Zhou, X, Zhang, M, et al. Bayesian shrinkage estimation of high
 #' dimensional causal mediation effects in omics studies. Biometrics. 2019;
-#' 1-11. \href{http://doi.org/10.1111/biom.13189}{doi:10.1111/biom.13189}
+#' 1-11. \href{https://doi.org/10.1111/biom.13189}{doi:10.1111/biom.13189}
 #' @author Alexander Rix
 #' @export
 fdr.bama <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws,

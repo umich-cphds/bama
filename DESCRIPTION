@@ -1,6 +1,6 @@
 Package: bama
 Title: High Dimensional Bayesian Mediation Analysis
-Version: 1.0.1
+Version: 1.2
 URL: https://github.com/umich-cphds/bama
 BugReports: https://github.com/umich-cphds/bama/issues
 Authors@R:
@@ -18,7 +18,8 @@ Authors@R:
            email = "yanys@umich.edu"))
 Description: Perform mediation analysis in the presence of high-dimensional
     mediators based on the potential outcome framework. Bayesian Mediation
-    Analysis (BAMA), developed by Song et al (2019) <doi:10.1111/biom.13189>,
+    Analysis (BAMA), developed by Song et al (2019) <doi:10.1111/biom.13189> and
+    Song et al (2020) <arXiv:arXiv:2009.11409>,
     relies on two Bayesian sparse linear mixed models to simultaneously analyze
     a relatively large number of mediators for a continuous exposure and outcome
     assuming a small number of mediators are truly active. This sparsity
@@ -38,8 +39,7 @@ LinkingTo:
     BH
 Imports:
     Rcpp,
-    parallel,
-    BH
+    parallel
 Depends:
     R (>= 3.5)
 Suggests:

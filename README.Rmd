@@ -13,7 +13,6 @@ knitr::opts_chunk$set(
 ```
 <!-- badges: start -->
 [![CRAN Version](https://img.shields.io/cran/v/bama?style=flat-square&color=blue&label=CRAN)](https://cran.r-project.org/package=bama)
-[![GitHub Release](https://img.shields.io/github/v/release/umich-cphds/bama?include_prereleases&label=Github&style=flat-square)](https://github.com/umich-cphds/bama)
 
 # Bayesian Mediation Analysis
 

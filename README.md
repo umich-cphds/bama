@@ -4,19 +4,19 @@
 Version](https://img.shields.io/cran/v/bama?style=flat-square&color=blue&label=CRAN)](https://cran.r-project.org/package=bama)
 [![GitHub
 Release](https://img.shields.io/github/v/release/umich-cphds/bama?include_prereleases&label=Github&style=flat-square)](https://github.com/umich-cphds/bama)
-[![Travis
-CI](https://img.shields.io/travis/umich-cphds/bama?style=flat-square)](https://travis-ci.org/umich-cphds/bama)
 
 Bayesian Mediation Analysis
 ===========================
 
 Perform mediation analysis in the presence of high-dimensional mediators
 based on the potential outcome framework. Bayesian Mediation Analysis
-(BAMA), developed by Song et al (2019), relies on two Bayesian sparse
-linear mixed models to simultaneously analyze a relatively large number
-of mediators for a continuous exposure and outcome assuming a small
-number of mediators are truly active. This sparsity assumption also
-allows the extension of univariate mediator analysis by casting the
+(BAMA), developed by Song et al (2019)
+<a href="doi:10.1111/biom.13189" class="uri">doi:10.1111/biom.13189</a>
+and Song et al (2020) &lt;arXiv:2009.11409&gt;, relies on two Bayesian
+sparse linear mixed models to simultaneously analyze a relatively large
+number of mediators for a continuous exposure and outcome assuming a
+small number of mediators are truly active. This sparsity assumption
+also allows the extension of univariate mediator analysis by casting the
 identification of active mediators as a variable selection problem and
 applying Bayesian methods with continuous shrinkage priors on the
 effects.

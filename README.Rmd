@@ -18,8 +18,8 @@ knitr::opts_chunk$set(
 
 Perform mediation analysis in the presence of high-dimensional
 mediators based on the potential outcome framework. Bayesian Mediation
-Analysis (BAMA), developed by Song et al (2019) <doi:10.1111/biom.13189> and
-Song et al (2020) <arXiv:2009.11409>,
+Analysis (BAMA), developed by Song et al (2019) \doi{doi:10.1111/biom.13189} and
+Song et al (2020),
 relies on two Bayesian sparse linear mixed models to simultaneously analyze
 a relatively large number of mediators for a continuous exposure and outcome
 assuming a small number of mediators are truly active. This sparsity

@@ -8,16 +8,14 @@ Bayesian Mediation Analysis
 
 Perform mediation analysis in the presence of high-dimensional mediators
 based on the potential outcome framework. Bayesian Mediation Analysis
-(BAMA), developed by Song et al (2019)
-<a href="doi:10.1111/biom.13189" class="uri">doi:10.1111/biom.13189</a>
-and Song et al (2020) &lt;arXiv:2009.11409&gt;, relies on two Bayesian
-sparse linear mixed models to simultaneously analyze a relatively large
-number of mediators for a continuous exposure and outcome assuming a
-small number of mediators are truly active. This sparsity assumption
-also allows the extension of univariate mediator analysis by casting the
-identification of active mediators as a variable selection problem and
-applying Bayesian methods with continuous shrinkage priors on the
-effects.
+(BAMA), developed by Song et al (2019) and Song et al (2020), relies on
+two Bayesian sparse linear mixed models to simultaneously analyze a
+relatively large number of mediators for a continuous exposure and
+outcome assuming a small number of mediators are truly active. This
+sparsity assumption also allows the extension of univariate mediator
+analysis by casting the identification of active mediators as a variable
+selection problem and applying Bayesian methods with continuous
+shrinkage priors on the effects.
 
 Installation
 ------------

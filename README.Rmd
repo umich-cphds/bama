@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 
 Perform mediation analysis in the presence of high-dimensional
 mediators based on the potential outcome framework. Bayesian Mediation
-Analysis (BAMA), developed by Song et al (2019) \doi{doi:10.1111/biom.13189} and
+Analysis (BAMA), developed by Song et al (2019) and
 Song et al (2020),
 relies on two Bayesian sparse linear mixed models to simultaneously analyze
 a relatively large number of mediators for a continuous exposure and outcome
@@ -110,6 +110,6 @@ mean(gmmmod$sigma.sq.g)
 # References
 Song, Y, Zhou, X, Zhang, M, et al. Bayesian shrinkage estimation of high
 dimensional causal mediation effects in omics studies. Biometrics. 2019;
-1-11. \doi{doi:10.1111/biom.13189}
+1-11.
 
 Song, Yanyi, Xiang Zhou, Jian Kang, Max T. Aung, Min Zhang, Wei Zhao, Belinda L. Needham et al. "Bayesian Sparse Mediation Analysis with Targeted Penalization of Natural Indirect Effects." arXiv preprint arXiv:2008.06366 (2020).

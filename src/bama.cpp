@@ -36,6 +36,7 @@ struct bama_mcmc {
     double k;
     double lm0;
     double lm1;
+    double lma1;
     double l;
 
     double sigma_m0;
@@ -72,17 +73,18 @@ struct bama_mcmc {
 
     bama_mcmc(arma::vec &Y, arma::vec &A, arma::mat &M, arma::mat &C1,
                   arma::mat &C2, arma::vec &beta_m, arma::vec &alpha_a,
-                  double k, double lm0, double lm1, double l)
+                  double k, double lm0, double lm1, double lma1, double l)
     {
         this->k   = k;
         this->lm0 = lm0;
         this->lm1 = lm1;
+        this->lma1 = lma1;
         this->l   = l;
 
         sigma_m0  = rand_invgamma(k, lm0);
         sigma_m1  = rand_invgamma(k, lm1);
         sigma_ma0 = rand_invgamma(k, lm0);
-        sigma_ma1 = rand_invgamma(k, lm1);
+        sigma_ma1 = rand_invgamma(k, lma1);
         sigma_a   = rand_invgamma(k, l);
         sigma_e   = rand_invgamma(k, l);
         sigma_g   = rand_invgamma(k, l);
@@ -270,7 +272,7 @@ struct bama_mcmc {
 
         sigma_a   = rand_invgamma(0.5 + k, 0.5 * beta_a * beta_a + l);
         sigma_m1  = rand_invgamma(c1 + k, c2 + lm1);
-        sigma_ma1 = rand_invgamma(c3 + k, c4 + lm1);
+        sigma_ma1 = rand_invgamma(c3 + k, c4 + lma1);
         sigma_m0  = rand_invgamma(c5 + k, c6 + lm0);
         sigma_ma0 = rand_invgamma(c7 + k, c8 + lm0);
 
@@ -311,10 +313,10 @@ struct bama_mcmc {
 Rcpp::List run_bama_mcmc(arma::vec &Y, arma::vec &A, arma::mat &M, arma::mat &C1,
                              arma::mat &C2, arma::vec &beta_m_init, arma::vec
                              &alpha_a_init, int burnin, int ndraws, double k,
-                             double lm0, double lm1, double l)
+                             double lm0, double lm1, double lma1, double l)
 {
     bama_mcmc mcmc = bama_mcmc(Y, A, M, C1, C2, beta_m_init, alpha_a_init, k,
-                               lm0, lm1, l);
+                               lm0, lm1, lma1, l);
 
     // Run mcmc for the number of specified burnin iterations.
     for (int i = 0; i < burnin; ++i)

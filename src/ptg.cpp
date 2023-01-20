@@ -364,305 +364,296 @@ arma::vec rdirichletcpp(arma::vec alpha_m) {
 double rand_igamma(double shape, double scale){
   return 1.0 / Rcpp::rgamma(1, shape, 1.0 / scale)[0];
 }
-
-// [[Rcpp::export]]
-void gmm(arma::vec Y,
-         arma::vec A,
-         arma::mat M,
-         arma::mat C1,
-         arma::mat C2,
-         int burnin,
-         int ndraws,
-         int seed,
-         double phi0,
-         double phi1,
-         int a0,
-         int a1,
-         int a2,
-         int a3,
-         double h1,
-         double l1,
-         double h2,
-         double l2,
-         double ha,
-         double la,
-         arma::mat& samples_betam,
-         arma::mat& samples_alphaa,
-         arma::mat& betam_member,
-         arma::mat& alphaa_member,
-         arma::mat& samples_betaa,
-         arma::mat& samples_alphac,
-         arma::mat& samples_betac,
-         arma::mat& samples_sigmasqa,
-         arma::mat& samples_sigmasqe,
-         arma::mat& samples_sigmasqg
-) {
-  
-  //std::ofstream myfile;
-  //myfile.open ("ptgdraws.txt");
-  
-  Rcpp::Environment base_env("package:base");
-  Rcpp::Function set_seed_r = base_env["set.seed"];
-  set_seed_r(std::floor(std::fabs(seed)));
-  
-  int n = M.n_rows;
-  int p = M.n_cols; // 0 < j < p
-  int q1 = C1.n_cols;
-  int q2 = C2.n_cols;
-  
-  arma::vec pi(4, arma::fill::zeros);
-  pi(0) = 0.25; pi(1) = 0.25;
-  pi(2) = 0.25; pi(3) = 0.25;
-  
-  int k = 3;
-  int v = 4;
-  
-  arma::vec diagPhinot(2, arma::fill::ones);
-  arma::mat Phinot(2, 2, arma::fill::zeros);
-  Phinot(0, 0) = phi0;
-  Phinot(1, 1) = phi1;
-  
-  arma::mat Wjmat(2, 2, arma::fill::eye);
-  arma::mat lwjmat(2, 1, arma::fill::ones); // need this?
-  
-  arma::vec betam(p, arma::fill::zeros);
-  arma::vec alphaa(p, arma::fill::zeros);
-  
-  arma::vec betac(q1, arma::fill::zeros);
-  arma::mat alphac(q2, p, arma::fill::zeros);
-  
-  arma::vec gamk(p, arma::fill::zeros); // need this?
-  
-  arma::vec logpgam(4, arma::fill::ones);
-  
-  arma::mat Vk1(2, 2, arma::fill::zeros);
-  Vk1(0, 0) = 1;
-  Vk1(0, 1) = 0.5;
-  Vk1(1, 0) = 0.5;
-  Vk1(1, 1) = 0.9;
-  
-  arma::mat Vk2(2, 2, arma::fill::zeros);
-  Vk2(0, 0) = 1;
-  
-  arma::mat Vk3(2, 2, arma::fill::zeros);
-  Vk3(1, 1) = 1;
-  
-  double sigmasqe = 1.0;
-  double sigmasqa = 1.0;
-  double sigmasqg = 1.0;
-  
-  arma::vec sseq(4, arma::fill::zeros);
-  sseq(0) = 0;
-  sseq(1) = 1;
-  sseq(2) = 2;
-  sseq(3) = 3; // start at 1?
-  
-  double betaa = 0.0;
-  
-  arma::mat bmaa(2, p, arma::fill::zeros);
-  
-  int draw = 0;
-  for(int it = 0; it < ndraws; it++) {
-    
-    for(int j = 0; j < p; j++) {
-      // Wj
-      arma::vec mj = M.col(j);
-      //myfile<< "sigmasqe: " << sigmasqe << "\n";
-      //myfile<< "sigmasqg: " << sigmasqg << "\n";
-      //myfile<< "accu(mj % mj): " << accu(mj % mj) << "\n";
-      Wjmat(0, 0) = accu(mj % mj) / sigmasqe;
-      //myfile<< "Wjmat(0, 0): " << Wjmat(0, 0) << "\n";
-      Wjmat(1, 1) = accu(A % A) / sigmasqg;
-      //myfile<< "Wjmat(1, 1): " << Wjmat(1, 1) << "\n";
-      //myfile<< "Wjmat(0, 0): " << Wjmat(0, 0) << " Wjmat(1, 1): " << Wjmat(1, 1) << "\n";
-      
-      //lwj
-      //myfile<< "lwjmat calculation: " << "\n";
-      lwjmat(0) = accu( (Y - A * betaa - M * betam + mj * betam(j)) % mj ) / sigmasqe;
-      lwjmat(1) = accu(mj % A) / sigmasqg;
-      ////myfile<< "lwjmat(0): " << lwjmat(0) << " lwjmat(1): " << lwjmat(1) << "\n";
-      
-      // logpgam
-      arma::vec lggam(1, arma::fill::zeros);
-      lggam = ( - 0.5 * std::log(det(Wjmat + Vk1.i())) - 0.5 * std::log(det(Vk1)) + 
-        0.5 * lwjmat.t() * ((Wjmat + Vk1.i()).i()) * lwjmat + std::log(pi(0) + 0.01));
-      logpgam(0) = lggam(0);
-      lggam = ( - 0.5 * std::log(abs(Wjmat(0, 0) + (1 / Vk2(0, 0)))) - 
-        0.5 * log(Vk2(0, 0)) + 0.5 * lwjmat(0) * (1 / (Wjmat(0, 0) + (1 / Vk2(0, 0)))) * lwjmat(0) + std::log(pi(1) + 0.01));
-      logpgam(1) = lggam(0);
-      lggam = ( - 0.5 * std::log(abs(Wjmat(1, 1) + (1 / Vk3(1, 1)))) - 
-        0.5 * log(Vk3(1, 1)) + 0.5 * lwjmat(1) * (1 / (Wjmat(1, 1) + (1 / Vk3(1, 1)))) * lwjmat(1) + std::log(pi(2) + 0.01));
-      logpgam(2) = lggam(0);
-      logpgam(3) = std::log(pi(3) + 0.01);
-      //myfile<< "logpgam(0): " << logpgam(0) << " logpgam(1): " << logpgam(1) << " logpgam(2): " << logpgam(2) << " logpgam(3): " << logpgam(3) << "\n";
-      
-      // sample k
-      double max = -100.0;
-      for(int i = 0; i < 4; i++) {
-        if(logpgam(i) > 10000) logpgam(i) = 10000;
-        if(logpgam(i) < -10000) logpgam(i) = -10000;
-        if(logpgam(i) > max) max = logpgam(i);
-      }
-      arma::vec ep = exp(logpgam - max);
-      arma::vec eprop = ep / accu(ep);
-      //myfile<< "sample k: " << "\n";
-      k = as_scalar( RcppArmadillo::sample_main(sseq, 1, true, eprop) );
-      //myfile<< "k: " << k << "\n";
-      
-      // sample betam and alphaa
-      arma::mat WjVkInvInv(2, 2, arma::fill::zeros);
-      
-      switch(k) {
-      case 0: WjVkInvInv = (Wjmat + Vk1.i()).i();
-        bmaa.col(j) = rmvnorm(1, WjVkInvInv * lwjmat, WjVkInvInv).t();
-        betam(j) = bmaa(0,j);
-        alphaa(j) = bmaa(1,j);
-        break;
-      case 1: WjVkInvInv(0, 0) = 1 / (Wjmat(0, 0) + (1 / Vk2(0, 0)));
-        bmaa(0,j) = R::rnorm(WjVkInvInv(0, 0) * lwjmat(0), sqrt(WjVkInvInv(0, 0)));
-        bmaa(1,j) = 0.0;
-        betam(j) = bmaa(0,j);
-        break;
-      case 2: WjVkInvInv(1, 1) = 1 / (Wjmat(1, 1) + (1 / Vk3(1, 1)));
-        bmaa(0,j) = 0.0;
-        bmaa(1,j) = R::rnorm(WjVkInvInv(1, 1) * lwjmat(1), sqrt(WjVkInvInv(1, 1)));
-        alphaa(j) = bmaa(1,j);
-        break;
-      case 3: bmaa(0,j) = 0.0;
-        bmaa(1,j) = 0.0;
-        betam(j) = 0.0;
-        alphaa(j) = 0.0;
-        break;
-      }
-      //myfile << "bmaa(1,p): " << bmaa(1,p) << " bmaa(0,p): " << bmaa(0,p) << "\n";
-      
-      if(draw >= burnin) {
-        samples_betam(draw - burnin, j) = betam(j);
-        samples_alphaa(draw - burnin, j) = alphaa(j);
-        if(betam(j) != 0.0) {
-          betam_member(draw - burnin, j) = 1;
-        }
-        if(alphaa(j) != 0.0) {
-          alphaa_member(draw - burnin, j) = 1;
-        }
-      }
-    }
-    
-    // sample pi
-    arma::vec a(4, arma::fill::zeros);
-    a(0) = a0; a(1) = a1; a(2) = a2; a(3) = a3;
-    for(int i = 0; i < p; i++) {
-      int k = gamk(i);
-      switch(k) {
-      case 0: a(0) += 1;
-        break;
-      case 1: a(1) += 1;
-        break;
-      case 2: a(2) += 1;
-        break;
-      case 3: a(3) += 1;
-        break;
-      }
-    }
-    
-    pi = rdirichletcpp(a);
-    
-    // sample the vk's
-    double sgam = accu(gamk);
-    ////myfile<< "sgam: " << sgam << "\n";
-    arma::mat gam_sum(2, 2, arma::fill::zeros);
-    for(int t = 0; t < p; t++) {
-      gam_sum += gamk(t) * (bmaa(0,p) * bmaa(0,p) + bmaa(1,p) * bmaa(1,p));
-    }
-    Vk1 = riwish(v + sgam, Phinot + gam_sum);
-    
-    double gam_sum1 = 0;
-    for(int t = 0; t < p; t++) {
-      gam_sum1 += gamk(t) * (bmaa(0,p) * bmaa(0,p));
-    }
-    Vk2(0, 0) = rand_igamma((v / 2) + sgam, (Phinot(0, 0) / 2) + gam_sum1);
-    ////myfile<< "Vk2(0, 0): " << Vk2(0, 0) << "\n";
-    
-    double gam_sum2 = 0;
-    for(int t = 0; t < p; t++) {
-      gam_sum2 += gamk(t) * (bmaa(1,p) * bmaa(1,p));
-    }
-    Vk3(1, 1) = rand_igamma((v / 2) + sgam, (Phinot(1, 1) / 2) + gam_sum2);
-    //myfile<< "Vk3(1, 1): " << Vk3(1, 1) << "\n";
-    // sample betaa
-    arma::vec mvar(2, arma::fill::zeros);
-    mvar(0) = accu(A % (Y - M * betam - C1 * betac)) / ((sigmasqe / sigmasqa) + accu(A % A));
-    mvar(1) = std::sqrt(1 / ((1 / sigmasqa) + (accu(A % A) / sigmasqe)));
-    betaa = R::rnorm(mvar(0), mvar(1));
-    //myfile << "betaa: " << betaa << "\n";
-    if(draw >= burnin) {
-      samples_betaa(draw - burnin, 0) = betaa;
-    }
-    
-    // sigmasqa
-    sigmasqa = rand_igamma(0.5 + ha, 0.5 * betaa * betaa + la);
-    //myfile << "sigmasqa: " << sigmasqa << "\n";
-    if(draw >= burnin) {
-      samples_sigmasqa(draw - burnin, 0) = sigmasqa;
-    }
-    
-    // sample sigmasqe
-    double sum_r = accu(Y - M * betam - A * betaa - C1 * betac);
-    sigmasqe = rand_igamma(0.5 * n + h1, 0.5 * sum_r * sum_r + l1);
-    //myfile<< "sigmasqe: " << sigmasqe << "\n";
-    if(draw >= burnin) {
-      samples_sigmasqe(draw - burnin, 0) = sigmasqe;
-    }
-    
-    // sample sigmasqg
-    double resg = 0;
-    arma::vec resv(1, arma::fill::zeros);
-    for(int i = 0; i < n; i++) {
-      resv = (M.row(i) - A.row(i) * alphaa - C2.row(i) * alphac) *
-        (M.row(i) - A.row(i) * alphaa - C2.row(i) * alphac).t();
-      resg += resv(0);
-      ////myfile<< "resv(0): " << resv(0) << "\n";
-    }
-    //myfile<< "resg: " << resg << "\n";
-    sigmasqg = rand_igamma((p * n / 2) + h2, (resg / 2) + l2);
-    //myfile<< "sigmasqg: " << sigmasqg << "\n";
-    if(draw >= burnin) {
-      samples_sigmasqg(draw - burnin, 0) = sigmasqg;
-    }
-    
-    // sample betac
-    double mu = 0;
-    double sd = 0;
-    for(int w = 0; w < q1; w++) {
-      arma::vec Cw = C1.col(w);
-      double betacw = betac(w);
-      mu = accu(Cw % (Y - A * betaa - M * betam - C1 * betac + Cw * betac(w))) / accu(Cw % Cw);
-      sd = sqrt(sigmasqe / accu(Cw % Cw));
-      betac(w) = R::rnorm(mu, sd);
-      ////myfile<< "betac(w): " << betac(w) << "\n";
-      if(draw >= burnin) {
-        samples_betac(draw - burnin, w) = betac(w);
-      }
-    }
-    
-    // sample alphac
-    mu = 0;
-    sd = 0;
-    for(int w = 0; w < q2; w++) {
-      arma::vec Cw = C2.col(w);
-      for(int j = 0; j < p; j++) {
-        mu = accu(Cw % (M.col(j) - A * alphaa(j) - C2 * alphac + Cw * alphac.col(j))) / accu(Cw % Cw);
-        sd = sqrt(sigmasqg / accu(Cw % Cw));
-        alphac(w, j) = R::rnorm(mu, sd);
-        //myfile<< "alphac(w, j): " << alphac(w, j) << "\n";
-        if(draw >= burnin) {
-          samples_alphac(draw - burnin, w * p + j) = alphac(w, j);
-        }
-      }
-    }
-    
-    draw += 1;
-  }
-  //myfile.close();
-}
+// 
+// // [[Rcpp::export]]
+// void gmm(arma::vec Y,
+//          arma::vec A,
+//          arma::mat M,
+//          arma::mat C1,
+//          arma::mat C2,
+//          int burnin,
+//          int ndraws,
+//          int seed,
+//          double phi0,
+//          double phi1,
+//          int a0,
+//          int a1,
+//          int a2,
+//          int a3,
+//          double h1,
+//          double l1,
+//          double h2,
+//          double l2,
+//          double ha,
+//          double la,
+//          arma::mat& samples_betam,
+//          arma::mat& samples_alphaa,
+//          arma::mat& betam_member,
+//          arma::mat& alphaa_member,
+//          arma::mat& samples_betaa,
+//          arma::mat& samples_alphac,
+//          arma::mat& samples_betac,
+//          arma::mat& samples_sigmasqa,
+//          arma::mat& samples_sigmasqe,
+//          arma::mat& samples_sigmasqg
+// ) {
+//   
+//   
+//   
+//   
+//   Rcpp::Environment base_env("package:base");
+//   Rcpp::Function set_seed_r = base_env["set.seed"];
+//   set_seed_r(std::floor(std::fabs(seed)));
+//   
+//   int n = M.n_rows;
+//   int p = M.n_cols; // 0 < j < p
+//   int q1 = C1.n_cols;
+//   int q2 = C2.n_cols;
+//   
+//   arma::vec pi(4, arma::fill::zeros);
+//   pi(0) = 0.25; pi(1) = 0.25;
+//   pi(2) = 0.25; pi(3) = 0.25;
+//   
+//   int k = 3;
+//   int v = 4;
+//   
+//   arma::vec diagPhinot(2, arma::fill::ones);
+//   arma::mat Phinot(2, 2, arma::fill::zeros);
+//   Phinot(0, 0) = phi0;
+//   Phinot(1, 1) = phi1;
+//   
+//   arma::mat Wjmat(2, 2, arma::fill::eye);
+//   arma::mat lwjmat(2, 1, arma::fill::ones); // need this?
+//   
+//   arma::vec betam(p, arma::fill::zeros);
+//   arma::vec alphaa(p, arma::fill::zeros);
+//   
+//   arma::vec betac(q1, arma::fill::zeros);
+//   arma::mat alphac(q2, p, arma::fill::zeros);
+//   
+//   arma::vec gamk(p, arma::fill::zeros); // need this?
+//   
+//   arma::vec logpgam(4, arma::fill::ones);
+//   
+//   arma::mat Vk1(2, 2, arma::fill::zeros);
+//   Vk1(0, 0) = 1;
+//   Vk1(0, 1) = 0.5;
+//   Vk1(1, 0) = 0.5;
+//   Vk1(1, 1) = 0.9;
+//   
+//   arma::mat Vk2(2, 2, arma::fill::zeros);
+//   Vk2(0, 0) = 1;
+//   
+//   arma::mat Vk3(2, 2, arma::fill::zeros);
+//   Vk3(1, 1) = 1;
+//   
+//   double sigmasqe = 1.0;
+//   double sigmasqa = 1.0;
+//   double sigmasqg = 1.0;
+//   
+//   arma::vec sseq(4, arma::fill::zeros);
+//   sseq(0) = 0;
+//   sseq(1) = 1;
+//   sseq(2) = 2;
+//   sseq(3) = 3; // start at 1?
+//   
+//   double betaa = 0.0;
+//   
+//   arma::mat bmaa(2, p, arma::fill::zeros);
+//   
+//   int draw = 0;
+//   for(int it = 0; it < ndraws; it++) {
+//     
+//     for(int j = 0; j < p; j++) {
+//       // Wj
+//       arma::vec mj = M.col(j);
+//       
+//       Wjmat(0, 0) = accu(mj % mj) / sigmasqe;
+//      
+//       Wjmat(1, 1) = accu(A % A) / sigmasqg;
+//       
+//       //lwj
+//      
+//       lwjmat(0) = accu( (Y - A * betaa - M * betam + mj * betam(j)) % mj ) / sigmasqe;
+//       lwjmat(1) = accu(mj % A) / sigmasqg;
+//      
+//       
+//       // logpgam
+//       arma::vec lggam(1, arma::fill::zeros);
+//       lggam = ( - 0.5 * std::log(det(Wjmat + Vk1.i())) - 0.5 * std::log(det(Vk1)) + 
+//         0.5 * lwjmat.t() * ((Wjmat + Vk1.i()).i()) * lwjmat + std::log(pi(0) + 0.01));
+//       logpgam(0) = lggam(0);
+//       lggam = ( - 0.5 * std::log(abs(Wjmat(0, 0) + (1 / Vk2(0, 0)))) - 
+//         0.5 * log(Vk2(0, 0)) + 0.5 * lwjmat(0) * (1 / (Wjmat(0, 0) + (1 / Vk2(0, 0)))) * lwjmat(0) + std::log(pi(1) + 0.01));
+//       logpgam(1) = lggam(0);
+//       lggam = ( - 0.5 * std::log(abs(Wjmat(1, 1) + (1 / Vk3(1, 1)))) - 
+//         0.5 * log(Vk3(1, 1)) + 0.5 * lwjmat(1) * (1 / (Wjmat(1, 1) + (1 / Vk3(1, 1)))) * lwjmat(1) + std::log(pi(2) + 0.01));
+//       logpgam(2) = lggam(0);
+//       logpgam(3) = std::log(pi(3) + 0.01);
+//       
+//       // sample k
+//       double max = -100.0;
+//       for(int i = 0; i < 4; i++) {
+//         if(logpgam(i) > 10000) logpgam(i) = 10000;
+//         if(logpgam(i) < -10000) logpgam(i) = -10000;
+//         if(logpgam(i) > max) max = logpgam(i);
+//       }
+//       arma::vec ep = exp(logpgam - max);
+//       arma::vec eprop = ep / accu(ep);
+//       
+//       k = as_scalar( RcppArmadillo::sample_main(sseq, 1, true, eprop) );
+//       
+//       // sample betam and alphaa
+//       arma::mat WjVkInvInv(2, 2, arma::fill::zeros);
+//       
+//       switch(k) {
+//       case 0: WjVkInvInv = (Wjmat + Vk1.i()).i();
+//         bmaa.col(j) = rmvnorm(1, WjVkInvInv * lwjmat, WjVkInvInv).t();
+//         betam(j) = bmaa(0,j);
+//         alphaa(j) = bmaa(1,j);
+//         break;
+//       case 1: WjVkInvInv(0, 0) = 1 / (Wjmat(0, 0) + (1 / Vk2(0, 0)));
+//         bmaa(0,j) = R::rnorm(WjVkInvInv(0, 0) * lwjmat(0), sqrt(WjVkInvInv(0, 0)));
+//         bmaa(1,j) = 0.0;
+//         betam(j) = bmaa(0,j);
+//         break;
+//       case 2: WjVkInvInv(1, 1) = 1 / (Wjmat(1, 1) + (1 / Vk3(1, 1)));
+//         bmaa(0,j) = 0.0;
+//         bmaa(1,j) = R::rnorm(WjVkInvInv(1, 1) * lwjmat(1), sqrt(WjVkInvInv(1, 1)));
+//         alphaa(j) = bmaa(1,j);
+//         break;
+//       case 3: bmaa(0,j) = 0.0;
+//         bmaa(1,j) = 0.0;
+//         betam(j) = 0.0;
+//         alphaa(j) = 0.0;
+//         break;
+//       }
+//       
+//       if(draw >= burnin) {
+//         samples_betam(draw - burnin, j) = betam(j);
+//         samples_alphaa(draw - burnin, j) = alphaa(j);
+//         if(betam(j) != 0.0) {
+//           betam_member(draw - burnin, j) = 1;
+//         }
+//         if(alphaa(j) != 0.0) {
+//           alphaa_member(draw - burnin, j) = 1;
+//         }
+//       }
+//     }
+//     
+//     // sample pi
+//     arma::vec a(4, arma::fill::zeros);
+//     a(0) = a0; a(1) = a1; a(2) = a2; a(3) = a3;
+//     for(int i = 0; i < p; i++) {
+//       int k = gamk(i);
+//       switch(k) {
+//       case 0: a(0) += 1;
+//         break;
+//       case 1: a(1) += 1;
+//         break;
+//       case 2: a(2) += 1;
+//         break;
+//       case 3: a(3) += 1;
+//         break;
+//       }
+//     }
+//     
+//     pi = rdirichletcpp(a);
+//     
+//     // sample the vk's
+//     double sgam = accu(gamk);
+//    
+//     arma::mat gam_sum(2, 2, arma::fill::zeros);
+//     for(int t = 0; t < p; t++) {
+//       gam_sum += gamk(t) * (bmaa(0,p) * bmaa(0,p) + bmaa(1,p) * bmaa(1,p));
+//     }
+//     Vk1 = riwish(v + sgam, Phinot + gam_sum);
+//     
+//     double gam_sum1 = 0;
+//     for(int t = 0; t < p; t++) {
+//       gam_sum1 += gamk(t) * (bmaa(0,p) * bmaa(0,p));
+//     }
+//     Vk2(0, 0) = rand_igamma((v / 2) + sgam, (Phinot(0, 0) / 2) + gam_sum1);
+//     
+//     double gam_sum2 = 0;
+//     for(int t = 0; t < p; t++) {
+//       gam_sum2 += gamk(t) * (bmaa(1,p) * bmaa(1,p));
+//     }
+//     Vk3(1, 1) = rand_igamma((v / 2) + sgam, (Phinot(1, 1) / 2) + gam_sum2);
+//     
+//     // sample betaa
+//     arma::vec mvar(2, arma::fill::zeros);
+//     mvar(0) = accu(A % (Y - M * betam - C1 * betac)) / ((sigmasqe / sigmasqa) + accu(A % A));
+//     mvar(1) = std::sqrt(1 / ((1 / sigmasqa) + (accu(A % A) / sigmasqe)));
+//     betaa = R::rnorm(mvar(0), mvar(1));
+//     
+//     if(draw >= burnin) {
+//       samples_betaa(draw - burnin, 0) = betaa;
+//     }
+//     
+//     // sigmasqa
+//     sigmasqa = rand_igamma(0.5 + ha, 0.5 * betaa * betaa + la);
+//     
+//     if(draw >= burnin) {
+//       samples_sigmasqa(draw - burnin, 0) = sigmasqa;
+//     }
+//     
+//     // sample sigmasqe
+//     double sum_r = accu(Y - M * betam - A * betaa - C1 * betac);
+//     sigmasqe = rand_igamma(0.5 * n + h1, 0.5 * sum_r * sum_r + l1);
+//     
+//     if(draw >= burnin) {
+//       samples_sigmasqe(draw - burnin, 0) = sigmasqe;
+//     }
+//     
+//     // sample sigmasqg
+//     double resg = 0;
+//     arma::vec resv(1, arma::fill::zeros);
+//     for(int i = 0; i < n; i++) {
+//       resv = (M.row(i) - A.row(i) * alphaa - C2.row(i) * alphac) *
+//         (M.row(i) - A.row(i) * alphaa - C2.row(i) * alphac).t();
+//       resg += resv(0);
+//     }
+//     
+//     sigmasqg = rand_igamma((p * n / 2) + h2, (resg / 2) + l2);
+//     
+//     if(draw >= burnin) {
+//       samples_sigmasqg(draw - burnin, 0) = sigmasqg;
+//     }
+//     
+//     // sample betac
+//     double mu = 0;
+//     double sd = 0;
+//     for(int w = 0; w < q1; w++) {
+//       arma::vec Cw = C1.col(w);
+//       double betacw = betac(w);
+//       mu = accu(Cw % (Y - A * betaa - M * betam - C1 * betac + Cw * betac(w))) / accu(Cw % Cw);
+//       sd = sqrt(sigmasqe / accu(Cw % Cw));
+//       betac(w) = R::rnorm(mu, sd);
+//       
+//       if(draw >= burnin) {
+//         samples_betac(draw - burnin, w) = betac(w);
+//       }
+//     }
+//     
+//     // sample alphac
+//     mu = 0;
+//     sd = 0;
+//     for(int w = 0; w < q2; w++) {
+//       arma::vec Cw = C2.col(w);
+//       for(int j = 0; j < p; j++) {
+//         mu = accu(Cw % (M.col(j) - A * alphaa(j) - C2 * alphac + Cw * alphac.col(j))) / accu(Cw % Cw);
+//         sd = sqrt(sigmasqg / accu(Cw % Cw));
+//         alphac(w, j) = R::rnorm(mu, sd);
+//         
+//         if(draw >= burnin) {
+//           samples_alphac(draw - burnin, w * p + j) = alphac(w, j);
+//         }
+//       }
+//     }
+//     
+//     draw += 1;
+//   }
+//   
+// }
 

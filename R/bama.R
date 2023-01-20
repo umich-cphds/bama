@@ -20,6 +20,8 @@
 #' that only a small proportion of mediators exhibit large effects
 #' ("active" mediators). \code{bama} uses a Metropolis-Hastings within Gibbs
 #' MCMC to generate posterior samples from the model.
+#' 
+#' @details NOTE: GMM not currently supported. Instead, use method = 'PTG'.
 #'
 #' @param Y Length \code{n} numeric outcome vector
 #' @param A Length \code{n} numeric exposure vector
@@ -32,7 +34,7 @@
 #' \itemize{
 #' \item{"BSLMM"}{ - mixture of two normal components; Song et al. 2019}
 #' \item{"PTG"}{ - product threshold Gaussian prior; Song et al. 2020}
-#' \item{"GMM"}{ - four-component Gaussian mixture prior; Song et al. 2020}
+#' \item{"GMM"}{ - NOTE: GMM not currently supported. Instead, use method = 'PTG'. four-component Gaussian mixture prior; Song et al. 2020}
 #' }
 #' @param inits list of initial values for the Gibbs sampler. Options are
 #' \itemize{
@@ -53,7 +55,9 @@
 #' \item{lm0}{ - Scale parameter prior for inverse gamma for the small normal
 #'     components}
 #' \item{lm1}{ - Scale parameter prior for inverse gamma for the large normal
-#'    components}
+#'    components of beta_m}
+#' \item{lma1}{ - Scale parameter prior for inverse gamma for the large normal
+#'    component of alpha_a}
 #' \item{l}{ - Scale parameter prior for the other inverse gamma distributions}
 #' }
 #' If \code{method = "PTG"}
@@ -72,7 +76,7 @@
 #' \item{kma}{ - inverse gamma shape prior for tau.sq.a}
 #' \item{lma}{ - inverse gamma scale prior for tau.sq.a}
 #' }
-#' If \code{method = "GMM"}
+#' If \code{method = "GMM". NOTE: GMM not currently supported. Instead, use method = 'PTG'.}
 #' \itemize{
 #' \item{phi0}{ - prior beta.m variance}
 #' \item{phi1}{ - prior alpha.a variance}
@@ -129,6 +133,7 @@
 #' \item{call}{The R call that generated the output.}
 #' }
 #' 
+#' NOTE: GMM not currently supported. Instead, use method = 'PTG'
 #' If method = "GMM", then \code{bama} returns a object of type "bama" with:
 #' \describe{
 #' \item{beta.m}{\code{ndraws x p} matrix containing outcome model mediator
@@ -189,8 +194,8 @@
 #' alpha.a <- rep(0, 100)
 #'
 #' out <- bama(Y = Y, A = A, M = M, C1 = C1, C2 = C2, method = "BSLMM", seed = 1234,
-#'             burnin = 1000, ndraws = 1100, weights = NULL, inits = NULL, 
-#'             control = list(k = 2, lm0 = 1e-04, lm1 = 1, l = 1))
+#'             burnin = 100, ndraws = 110, weights = NULL, inits = NULL, 
+#'             control = list(k = 2, lm0 = 1e-04, lm1 = 1, lma1 = 1, l = 1))
 #'
 #' # The package includes a function to summarise output from 'bama'
 #' summary <- summary(out)
@@ -199,7 +204,7 @@
 #' 
 #' # Product Threshold Gaussian 
 #' ptgmod = bama(Y = Y, A = A, M = M, C1 = C1, C2 = C2, method = "PTG", seed = 1234,
-#'               burnin = 1000, ndraws = 1100, weights = NULL, inits = NULL, 
+#'               burnin = 100, ndraws = 110, weights = NULL, inits = NULL, 
 #'               control = list(lambda0 = 0.04, lambda1 = 0.2, lambda2 = 0.2))
 #' 
 #' mean(ptgmod$beta.a)
@@ -208,19 +213,19 @@
 #' apply(ptgmod$betam_member, 2, mean)
 #' apply(ptgmod$alphaa_member, 2, mean)
 #' 
-#' # Gaussian Mixture Model
-#' gmmmod = bama(Y = Y, A = A, M = M, C1 = C1, C2 = C2, method = "GMM", seed = 1234,
-#'               burnin = 1000, ndraws = 1100, weights = NULL, inits = NULL, 
-#'               control = list(phi0 = 0.01, phi1 = 0.01))
-#' 
-#' mean(gmmmod$beta.a)
-#' apply(gmmmod$beta.m, 2, mean)
-#' apply(gmmmod$alpha.a, 2, mean)
-#' 
-#' mean(gmmmod$sigma.sq.a)
-#' mean(gmmmod$sigma.sq.e)
-#' mean(gmmmod$sigma.sq.g)
-#' 
+# # Gaussian Mixture Model
+# gmmmod = bama(Y = Y, A = A, M = M, C1 = C1, C2 = C2, method = "GMM", seed = 1234,
+#               burnin = 100, ndraws = 110, weights = NULL, inits = NULL, 
+#               control = list(phi0 = 0.01, phi1 = 0.01))
+# 
+# mean(gmmmod$beta.a)
+# apply(gmmmod$beta.m, 2, mean)
+# apply(gmmmod$alpha.a, 2, mean)
+# 
+# mean(gmmmod$sigma.sq.a)
+# mean(gmmmod$sigma.sq.e)
+# mean(gmmmod$sigma.sq.g)
+# 
 #' }
 #' 
 #' @references
@@ -236,7 +241,7 @@
 #' @authors Alexander Rix, Michael Kleinsasser
 #' @export
 bama <- function(Y, A, M, C1, C2, method, burnin, ndraws, weights = NULL, inits = NULL, 
-                 control = list(k = 2.0, lm0 = 1e-4, lm1 = 1.0, l = 1.0, 
+                 control = list(k = 2.0, lm0 = 1e-4, lm1 = 1.0, lma1 = 1.0, l = 1.0, 
                                 lambda0 = 0.04, lambda1 = 0.2, lambda2 = 0.2,
                                 phi0 = 0.01, phi1 = 0.01, a0 = 0.01 * ncol(M), 
                                 a1 = 0.05 * ncol(M), a2 = 0.05 * ncol(M), a3 = 0.89 * ncol(M)), seed = NULL)
@@ -341,6 +346,10 @@ bama <- function(Y, A, M, C1, C2, method, burnin, ndraws, weights = NULL, inits 
             lm1 = 1.0
         else
             lm1 = control$lm1
+        if (!("lma1" %in% names(control)))
+          lma1 = 1.0
+        else
+          lma1 = control$lma1 
         if (!("l" %in% names(control)))
             l = 1.0
         else
@@ -355,11 +364,14 @@ bama <- function(Y, A, M, C1, C2, method, burnin, ndraws, weights = NULL, inits 
         if (!is.numeric(lm1) || !is.vector(lm1) || length(lm1) != 1 || lm1 < 0)
             stop("'lm1' should be a nonnegative number.")
         
+        if (!is.numeric(lma1) || !is.vector(lma1) || length(lma1) != 1 || lma1 < 0)
+          stop("'lma1' should be a nonnegative number.")
+        
         if (!is.numeric(l) || !is.vector(l) || length(l) != 1 || l < 0)
             stop("'l' should be a nonnegative number.")
         
         bama.out <- run_bama_mcmc(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws - burnin,
-                                  k, lm0, lm1, l)
+                                  k, lm0, lm1, lma1, l)
         
         colnames(bama.out$beta.m)  <- colnames(M)
         colnames(bama.out$alpha.a) <- colnames(M)
@@ -453,6 +465,8 @@ bama <- function(Y, A, M, C1, C2, method, burnin, ndraws, weights = NULL, inits 
         colnames(bama.out$alpha.a) <- colnames(M)
         
     } else if (method == "GMM") {
+      
+      stop("GMM is not currently supported. Instead, use method = 'PTG'.")
         
         if (!("phi0" %in% names(control)))
             control$phi0 = 0.01
@@ -490,36 +504,36 @@ bama <- function(Y, A, M, C1, C2, method, burnin, ndraws, weights = NULL, inits 
         samples_sigmasqe = matrix(rep(0, (ndraws - burnin) * 1), nrow = (ndraws - burnin))
         samples_sigmasqg = matrix(rep(0, (ndraws - burnin) * 1), nrow = (ndraws - burnin))
 
-        gmm(Y = Y, 
-            A = A, 
-            M = M, 
-            C1 = C1,
-            C2 = C2,
-            ndraws = ndraws, 
-            burnin = burnin, 
-            seed = seed,
-            phi0 = control$phi0,
-            phi1 = control$phi1,
-            a0 = control$a0,
-            a1 = control$a1,
-            a2 = control$a2,
-            a3 = control$a3,
-            h1 = control$h1,
-            l1 = control$l1,
-            h2 = control$h2,
-            l2 = control$l2,
-            ha = control$ha,
-            la = control$la,
-            samples_betam = samples_betam, 
-            samples_alphaa = samples_alphaa,
-            betam_member = betam_member,
-            alphaa_member = alphaa_member,
-            samples_betaa = samples_betaa,
-            samples_alphac = samples_alphac,
-            samples_betac = samples_betac,
-            samples_sigmasqa = samples_sigmasqa,
-            samples_sigmasqe = samples_sigmasqe,
-            samples_sigmasqg = samples_sigmasqg)
+        # gmm(Y = Y, 
+        #     A = A, 
+        #     M = M, 
+        #     C1 = C1,
+        #     C2 = C2,
+        #     ndraws = ndraws, 
+        #     burnin = burnin, 
+        #     seed = seed,
+        #     phi0 = control$phi0,
+        #     phi1 = control$phi1,
+        #     a0 = control$a0,
+        #     a1 = control$a1,
+        #     a2 = control$a2,
+        #     a3 = control$a3,
+        #     h1 = control$h1,
+        #     l1 = control$l1,
+        #     h2 = control$h2,
+        #     l2 = control$l2,
+        #     ha = control$ha,
+        #     la = control$la,
+        #     samples_betam = samples_betam, 
+        #     samples_alphaa = samples_alphaa,
+        #     betam_member = betam_member,
+        #     alphaa_member = alphaa_member,
+        #     samples_betaa = samples_betaa,
+        #     samples_alphac = samples_alphac,
+        #     samples_betac = samples_betac,
+        #     samples_sigmasqa = samples_sigmasqa,
+        #     samples_sigmasqe = samples_sigmasqe,
+        #     samples_sigmasqg = samples_sigmasqg)
         
         bama.out$beta.m = samples_betam
         bama.out$alpha.a = samples_alphaa
@@ -561,7 +575,7 @@ bama <- function(Y, A, M, C1, C2, method, burnin, ndraws, weights = NULL, inits 
 #' @export
 summary.bama <- function(object, rank = F, ci = c(0.025, .975), ...)
 {
-    if (class(object) != "bama")
+    if (!identical(class(object), "bama"))
         stop("'object' is not an bama object.")
 
     if (!is.logical(rank) || length(rank) != 1)

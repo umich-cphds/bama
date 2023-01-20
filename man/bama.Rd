@@ -15,9 +15,9 @@ bama(
   ndraws,
   weights = NULL,
   inits = NULL,
-  control = list(k = 2, lm0 = 1e-04, lm1 = 1, l = 1, lambda0 = 0.04, lambda1 = 0.2,
-    lambda2 = 0.2, phi0 = 0.01, phi1 = 0.01, a0 = 0.01 * ncol(M), a1 = 0.05 * ncol(M), a2
-    = 0.05 * ncol(M), a3 = 0.89 * ncol(M)),
+  control = list(k = 2, lm0 = 1e-04, lm1 = 1, lma1 = 1, l = 1, lambda0 = 0.04, lambda1 =
+    0.2, lambda2 = 0.2, phi0 = 0.01, phi1 = 0.01, a0 = 0.01 * ncol(M), a1 = 0.05 *
+    ncol(M), a2 = 0.05 * ncol(M), a3 = 0.89 * ncol(M)),
   seed = NULL
 )
 }
@@ -38,7 +38,7 @@ mediator model}
 \itemize{
 \item{"BSLMM"}{ - mixture of two normal components; Song et al. 2019}
 \item{"PTG"}{ - product threshold Gaussian prior; Song et al. 2020}
-\item{"GMM"}{ - four-component Gaussian mixture prior; Song et al. 2020}
+\item{"GMM"}{ - NOTE: GMM not currently supported. Instead, use method = 'PTG'. four-component Gaussian mixture prior; Song et al. 2020}
 }}
 
 \item{burnin}{number of iterations to run the MCMC before sampling}
@@ -63,7 +63,9 @@ and hyper-prior parameters. Options vary by method selection. If
 \item{lm0}{ - Scale parameter prior for inverse gamma for the small normal
 components}
 \item{lm1}{ - Scale parameter prior for inverse gamma for the large normal
-components}
+components of beta_m}
+\item{lma1}{ - Scale parameter prior for inverse gamma for the large normal
+component of alpha_a}
 \item{l}{ - Scale parameter prior for the other inverse gamma distributions}
 }
 If \code{method = "PTG"}
@@ -82,7 +84,7 @@ If \code{method = "PTG"}
 \item{kma}{ - inverse gamma shape prior for tau.sq.a}
 \item{lma}{ - inverse gamma scale prior for tau.sq.a}
 }
-If \code{method = "GMM"}
+If \code{method = "GMM". NOTE: GMM not currently supported. Instead, use method = 'PTG'.}
 \itemize{
 \item{phi0}{ - prior beta.m variance}
 \item{phi1}{ - prior alpha.a variance}
@@ -141,6 +143,7 @@ of the larger normal component for exposure-mediator coefficients
 \item{call}{The R call that generated the output.}
 }
 
+NOTE: GMM not currently supported. Instead, use method = 'PTG'
 If method = "GMM", then \code{bama} returns a object of type "bama" with:
 \describe{
 \item{beta.m}{\code{ndraws x p} matrix containing outcome model mediator
@@ -204,6 +207,8 @@ in mediating the exposure-outcome relationship. Second, it assumes
 that only a small proportion of mediators exhibit large effects
 ("active" mediators). \code{bama} uses a Metropolis-Hastings within Gibbs
 MCMC to generate posterior samples from the model.
+
+NOTE: GMM not currently supported. Instead, use method = 'PTG'.
 }
 \examples{
 library(bama)
@@ -221,8 +226,8 @@ beta.m  <- rep(0, 100)
 alpha.a <- rep(0, 100)
 
 out <- bama(Y = Y, A = A, M = M, C1 = C1, C2 = C2, method = "BSLMM", seed = 1234,
-            burnin = 1000, ndraws = 1100, weights = NULL, inits = NULL, 
-            control = list(k = 2, lm0 = 1e-04, lm1 = 1, l = 1))
+            burnin = 100, ndraws = 110, weights = NULL, inits = NULL, 
+            control = list(k = 2, lm0 = 1e-04, lm1 = 1, lma1 = 1, l = 1))
 
 # The package includes a function to summarise output from 'bama'
 summary <- summary(out)
@@ -231,7 +236,7 @@ head(summary)
 
 # Product Threshold Gaussian 
 ptgmod = bama(Y = Y, A = A, M = M, C1 = C1, C2 = C2, method = "PTG", seed = 1234,
-              burnin = 1000, ndraws = 1100, weights = NULL, inits = NULL, 
+              burnin = 100, ndraws = 110, weights = NULL, inits = NULL, 
               control = list(lambda0 = 0.04, lambda1 = 0.2, lambda2 = 0.2))
 
 mean(ptgmod$beta.a)
@@ -239,19 +244,6 @@ apply(ptgmod$beta.m, 2, mean)
 apply(ptgmod$alpha.a, 2, mean)
 apply(ptgmod$betam_member, 2, mean)
 apply(ptgmod$alphaa_member, 2, mean)
-
-# Gaussian Mixture Model
-gmmmod = bama(Y = Y, A = A, M = M, C1 = C1, C2 = C2, method = "GMM", seed = 1234,
-              burnin = 1000, ndraws = 1100, weights = NULL, inits = NULL, 
-              control = list(phi0 = 0.01, phi1 = 0.01))
-
-mean(gmmmod$beta.a)
-apply(gmmmod$beta.m, 2, mean)
-apply(gmmmod$alpha.a, 2, mean)
-
-mean(gmmmod$sigma.sq.a)
-mean(gmmmod$sigma.sq.e)
-mean(gmmmod$sigma.sq.g)
 
 }
 

@@ -20,6 +20,7 @@ fdr.bama(
   k = 2,
   lm0 = 1e-04,
   lm1 = 1,
+  lma1 = 1,
   l = 1,
   mc.cores = 1,
   type = "PSOCK"
@@ -61,7 +62,10 @@ the null pip distribution. Default is 200}
 components. Default is 1e-4}
 
 \item{lm1}{Scale parameter prior for inverse gamma for the large normal
-components. Default is 1.0}
+component of beta_m. Default is 1.0}
+
+\item{lma1}{Scale parameter prior for inverse gamma for the large normal
+component of alpha_a. Default is 1.0}
 
 \item{l}{Scale parameter prior for the other inverse gamma distributions.
 Default is 1.0}

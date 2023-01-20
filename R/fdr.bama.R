@@ -25,7 +25,9 @@
 #' @param lm0 Scale parameter prior for inverse gamma for the small normal
 #'    components. Default is 1e-4
 #' @param lm1 Scale parameter prior for inverse gamma for the large normal
-#'    components. Default is 1.0
+#'    component of beta_m. Default is 1.0
+#' @param lma1 Scale parameter prior for inverse gamma for the large normal
+#'    component of alpha_a. Default is 1.0
 #' @param l Scale parameter prior for the other inverse gamma distributions.
 #'     Default is 1.0
 #' @param mc.cores The number of cores to use while running \code{fdr.bama}.
@@ -78,7 +80,7 @@
 #' @export
 fdr.bama <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws,
                      weights = NULL, npermutations = 200, fdr = 0.1, k = 2.0,
-                     lm0 = 1e-4, lm1 = 1.0, l = 1.0, mc.cores = 1, type = "PSOCK")
+                     lm0 = 1e-4, lm1 = 1.0, lma1 = 1.0, l = 1.0, mc.cores = 1, type = "PSOCK")
 {
     call <- match.call()
 
@@ -90,7 +92,7 @@ fdr.bama <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws,
 
     bama.out <- bama(Y = Y, A = A, M = M, C1 = C1, C2 = C2, method = "BSLMM",
                      burnin = burnin, ndraws = ndraws, weights = weights, 
-                     control = list(k = k, lm0 = lm0, lm1 = lm1, l = l))
+                     control = list(k = k, lm0 = lm0, lm1 = lm1, lma1 = lma1, l = l))
 
     pi2 <- colMeans(bama.out$r1 == 0 & bama.out$r3 == 1)
     pi3 <- colMeans(bama.out$r1 == 1 & bama.out$r3 == 0)
@@ -121,14 +123,14 @@ fdr.bama <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws,
 
         n <- length(Y)
         bama.r1 <- run_bama_mcmc(Y[sample(n)], A, M, C1, C2, beta.m, alpha.a,
-                                 burnin, ndraws, k, lm0, lm1, l)
+                                 burnin, ndraws, k, lm0, lm1, lma1, l)
 
         bama.r3 <- run_bama_mcmc(Y, A, M[sample(n), ], C1, C2, beta.m, alpha.a,
-                                 burnin, ndraws, k, lm0, lm1, l)
+                                 burnin, ndraws, k, lm0, lm1, lma1, l)
 
         bama.r1.r3 <- run_bama_mcmc(Y[sample(n)], A, M[sample(n), ], C1, C2,
                                     beta.m, alpha.a, burnin, ndraws, k, lm0,
-                                    lm1, l)
+                                    lm1, lma1, l)
 
         p2 <- colMeans(bama.r1$r1 == 0 & bama.r1$r3 == 1)
         p3 <- colMeans(bama.r3$r1 == 1 & bama.r3$r3 == 0)
@@ -146,7 +148,7 @@ fdr.bama <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws,
         cl <- parallel::makeCluster(mc.cores, type = type)
         parallel::clusterExport(cl, list("Y", "A", "M", "C1", "C2", "beta.m",
                                          "alpha.a", "burnin", "ndraws", "k",
-                                         "lm0", "lm1", "l", "pi2",  "pi3",
+                                         "lm0", "lm1","lma1","l", "pi2",  "pi3",
                                          "pi4", "seeds"),
                                 envir = environment()
         )
@@ -190,7 +192,7 @@ fdr.bama <- function(Y, A, M, C1, C2, beta.m, alpha.a, burnin, ndraws,
 summary.fdr.bama <- function(object, rank = F, ci = c(0.025, 0.975),
                              fdr = object$fdr, filter = T, ...)
 {
-    if (class(object) != "fdr.bama")
+    if (!identical(class(object), "fdr.bama"))
         stop("'object' is not an bama object.")
 
     if (!is.logical(rank) || length(rank) != 1)

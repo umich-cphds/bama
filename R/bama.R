@@ -31,13 +31,13 @@
 #' @param C2 \code{n x nc2} numeric matrix of extra covariates to include in the
 #'     mediator model
 #' @param method String indicating which method to use. Options are
-#' \itemize{
+#' \describe{
 #' \item{"BSLMM"}{ - mixture of two normal components; Song et al. 2019}
 #' \item{"PTG"}{ - product threshold Gaussian prior; Song et al. 2020}
 #' \item{"GMM"}{ - NOTE: GMM not currently supported. Instead, use method = 'PTG'. four-component Gaussian mixture prior; Song et al. 2020}
 #' }
 #' @param inits list of initial values for the Gibbs sampler. Options are
-#' \itemize{
+#' \describe{
 #' \item{beta.m}{ - Length \code{p} numeric vector of initial \code{beta.m} in the
 #'     outcome model. See details for equation}
 #' \item{alpha.a}{ - Length \code{p} numeric vector of initial \code{alpha.a} in
@@ -50,7 +50,7 @@
 #' @param control list of Gibbs algorithm control options. These include prior
 #' and hyper-prior parameters. Options vary by method selection. If 
 #' \code{method = "BSLMM"}
-#' \itemize{
+#' \describe{
 #' \item{k}{ - Shape parameter prior for inverse gamma}
 #' \item{lm0}{ - Scale parameter prior for inverse gamma for the small normal
 #'     components}
@@ -61,7 +61,7 @@
 #' \item{l}{ - Scale parameter prior for the other inverse gamma distributions}
 #' }
 #' If \code{method = "PTG"}
-#' \itemize{
+#' \describe{
 #' \item{lambda0}{ - threshold parameter for product of alpha.a and beta.m effect}
 #' \item{lambda1}{ - threshold parameter for beta.m effect}
 #' \item{lambda2}{ - threshold parameter for alpha.a effect}
@@ -77,7 +77,7 @@
 #' \item{lma}{ - inverse gamma scale prior for tau.sq.a}
 #' }
 #' If \code{method = "GMM". NOTE: GMM not currently supported. Instead, use method = 'PTG'.}
-#' \itemize{
+#' \describe{
 #' \item{phi0}{ - prior beta.m variance}
 #' \item{phi1}{ - prior alpha.a variance}
 #' \item{a0}{ - prior count of non-zero beta.m and alpha.a effects}
